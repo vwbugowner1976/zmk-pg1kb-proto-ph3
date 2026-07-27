@@ -1,0 +1,71 @@
+if SHIELD_PG1KB_PROTO_LEFT
+
+config ZMK_KEYBOARD_NAME
+    default "PG1KB Proto"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default n
+
+config INPUT
+    bool
+    default y
+
+config SPI
+    bool
+    default y
+
+config ZMK_POINTING
+    bool
+    default y
+
+endif
+
+if SHIELD_PG1KB_PROTO_RIGHT
+
+config ZMK_KEYBOARD_NAME
+    default "PG1KB Proto"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+config INPUT
+    bool
+    default y
+
+config SPI
+    bool
+    default y
+
+config ZMK_BLE
+    bool
+    default y
+
+config ZMK_USB
+    bool
+    default y
+
+config ZMK_POINTING
+    bool
+    default y
+
+endif
+
+if SHIELD_PG1KB_PROTO_LEFT || SHIELD_PG1KB_PROTO_RIGHT
+
+config ZMK_SPLIT
+    default y
+
+# トラックボールドライバは左右とも PAW3222 / PMW3610 のどちらも選べるようにしておく。
+# overlay の compatible に一致した側だけを有効にするため、default に DT 条件を付ける。
+# ここで `config PMW3610` を再定義すると、ドライバ側の定義が持つ
+# `depends on DT_HAS_PIXART_PMW3610_ENABLED` では抑止できない（Kconfig は複数定義の
+# depends を OR で扱うため）。そのため default 側で明示的に条件を付ける必要がある。
+config PAW3222
+    bool
+    default y if DT_HAS_PIXART_PAW3222_ENABLED
+
+config PMW3610
+    bool
+    default y if DT_HAS_PIXART_PMW3610_ENABLED
+
+endif

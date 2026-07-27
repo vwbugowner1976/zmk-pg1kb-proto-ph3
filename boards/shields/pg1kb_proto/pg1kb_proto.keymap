@@ -1,0 +1,108 @@
+#include <input/processors.dtsi>
+#include <dt-bindings/zmk/input_transform.h>
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/pointing.h>
+
+/ {
+    behaviors {
+        lt {
+            tapping-term-ms = <150>;
+            quick-tap-ms = <200>;
+        };
+    };
+
+    combos {
+        compatible = "zmk,combos";
+
+        combo-bs {
+            bindings = <&kp BACKSPACE>;
+            key-positions = <27 28>;
+        };
+
+        combo-del {
+            bindings = <&kp DELETE>;
+            key-positions = <28 29>;
+        };
+
+        combo-enter {
+            bindings = <&kp ENTER>;
+            key-positions = <27 28 29>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            display-name = "Base";
+            bindings = <
+&kp ESC         &mkp MB4                                &mkp LCLK  &mkp RCLK    &mkp MCLK         &mkp LCLK                                &mkp MB5   &kp MINUS
+&kp TAB         &kp Q     &kp W         &kp E           &kp R      &kp T        &kp Y             &kp U      &kp I           &kp O         &kp P      &kp EQUAL
+&kp LCTRL       &kp A     &kp S         &kp D           &kp F      &kp G        &kp H             &kp J      &kp K           &kp L         &kp SEMI   &kp SINGLE_QUOTE
+&kp LEFT_SHIFT  &kp Z     &kp X         &kp C           &kp V      &kp B        &kp N             &kp M      &kp COMMA       &kp PERIOD    &kp SLASH  &kp BACKSLASH
+                          &kp LEFT_ALT  &lt 3 LEFT_GUI  &kp SPACE  &lt 1 LANG2  &lt 2 LANGUAGE_1  &kp ENTER  &kp LANGUAGE_1  &kp LEFT_GUI
+            >;
+        };
+
+        layer_1 {
+            display-name = "Num";
+            bindings = <
+&trans  &trans                  &trans  &trans  &trans    &trans                       &trans        &kp BSPC
+&none   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5  &kp N6    &kp N7    &kp N8  &kp N9     &kp N0        &kp DEL
+&trans  &trans  &trans  &trans  &trans  &trans  &kp LEFT  &kp DOWN  &kp UP  &kp RIGHT  &kp COLON     &kp DOUBLE_QUOTES
+&trans  &trans  &trans  &trans  &trans  &trans  &trans    &trans    &trans  &trans     &kp QUESTION  &kp PIPE
+                &trans  &trans  &trans  &trans  &trans    &trans    &trans  &trans
+            >;
+        };
+
+        layer_2 {
+            display-name = "Sym";
+            bindings = <
+&trans  &kp EXCLAMATION                         &trans                &trans         &trans            &trans                                         &kp END          &kp F12
+&trans  &kp QUESTION     &kp AT_SIGN  &kp HASH  &kp DOLLAR            &kp PERCENT    &kp LCTRL         &kp AMPERSAND          &kp ASTERISK  &kp HOME  &kp PRINTSCREEN  &trans
+&trans  &trans           &trans       &trans    &kp LEFT_BRACE        &kp LBKT       &kp RBKT          &kp RIGHT_BRACE        &trans        &trans    &trans           &trans
+&trans  &trans           &trans       &trans    &kp LEFT_PARENTHESIS  &kp LESS_THAN  &kp GREATER_THAN  &kp RIGHT_PARENTHESIS  &trans        &trans    &trans           &trans
+                         &trans       &trans    &trans                &trans         &trans            &trans                 &trans        &trans
+            >;
+        };
+
+        layer_3 {
+            display-name = "Sys";
+            bindings = <
+&studio_unlock &sys_reset                                &bt BT_CLR    &bt BT_CLR_ALL  &trans  &trans                   &trans          &trans
+&trans         &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4    &trans  &kp N7  &kp N8  &kp N9   &kp ASTRK       &kp SLASH
+&trans         &trans        &trans        &trans        &trans        &trans          &trans  &kp N4  &kp N5  &kp N6   &kp PLUS        &kp MINUS
+&trans         &trans        &trans        &trans        &trans        &trans          &trans  &kp N1  &kp N2  &kp N3   &kp EQUAL       &trans
+                             &trans        &trans        &trans        &trans          &trans  &kp N0  &trans  &kp DOT
+            >;
+        };
+
+        /*
+         * ZMK Studio でのみ使える予備レイヤー。
+         * status = "reserved" のレイヤーは通常ビルドでは無視され、
+         * Studio 有効ビルドでのみ「追加できるレイヤー」として現れる。
+         */
+        extra_1 {
+            status = "reserved";
+        };
+
+        extra_2 {
+            status = "reserved";
+        };
+    };
+};
+
+&left_trackball_listener {
+    input-processors =
+        <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
+        <&zip_xy_to_scroll_mapper>,
+        <&zip_scroll_scaler 1 16>;
+};
+
+&right_trackball_listener {
+    input-processors =
+        <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT)>,
+        <&zip_xy_scaler 3 2>;
+};

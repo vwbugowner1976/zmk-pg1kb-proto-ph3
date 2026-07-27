@@ -1,0 +1,104 @@
+#include "pg1kb_proto.dtsi"
+
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/*
+ * トラックボールセンサーの選択
+ * 使う方の #define だけを有効にする（SCLK / SDIO / CS / MOTION の配線は両センサー共通）
+ */
+#define PG1KB_TRACKBALL_PAW3222
+// #define PG1KB_TRACKBALL_PMW3610
+
+#if defined(PG1KB_TRACKBALL_PAW3222) == defined(PG1KB_TRACKBALL_PMW3610)
+#error "PG1KB_TRACKBALL_PAW3222 / PG1KB_TRACKBALL_PMW3610 はどちらか一方だけを有効にしてください"
+#endif
+
+/ {
+    chosen {
+        zmk,battery = &non_lipo_battery;
+    };
+
+    non_lipo_battery: non_lipo_battery {
+        compatible = "zmk,non-lipo-battery";
+        io-channels = <&adc 3>;
+    };
+};
+
+&default_transform {
+    col-offset = <6>;
+};
+
+&vbatt {
+    status = "disabled";
+};
+
+&left_trackball_listener {
+    status = "okay";
+};
+
+&right_trackball_listener {
+    status = "okay";
+};
+
+&kscan0 {
+    row-gpios
+        = <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+        , <&gpio0 9 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+        , <&gpio1 1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+        , <&gpio0 19 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+        , <&gpio0 15 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+        ;
+
+    col-gpios
+        = <&xiao_d 6 GPIO_ACTIVE_HIGH>
+        , <&xiao_d 4 GPIO_ACTIVE_HIGH>
+        , <&xiao_d 3 GPIO_ACTIVE_HIGH>
+        , <&xiao_d 2 GPIO_ACTIVE_HIGH>
+        , <&xiao_d 1 GPIO_ACTIVE_HIGH>
+        , <&xiao_d 0 GPIO_ACTIVE_HIGH>
+        ;
+};
+
+&pinctrl {
+    pg1kb_proto_spi0_default: pg1kb_proto_spi0_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 1, 5)>,
+                    <NRF_PSEL(SPIM_MOSI, 1, 7)>,
+                    <NRF_PSEL(SPIM_MISO, 1, 7)>;
+        };
+    };
+
+    pg1kb_proto_spi0_sleep: pg1kb_proto_spi0_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 1, 5)>,
+                    <NRF_PSEL(SPIM_MOSI, 1, 7)>,
+                    <NRF_PSEL(SPIM_MISO, 1, 7)>;
+            low-power-enable;
+        };
+    };
+};
+
+&spi0 {
+    status = "okay";
+    compatible = "nordic,nrf-spim";
+    pinctrl-0 = <&pg1kb_proto_spi0_default>;
+    pinctrl-1 = <&pg1kb_proto_spi0_sleep>;
+    pinctrl-names = "default", "sleep";
+    cs-gpios = <&gpio1 3 GPIO_ACTIVE_LOW>;
+};
+
+&trackball {
+    status = "okay";
+    irq-gpios = <&xiao_d 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+
+#ifdef PG1KB_TRACKBALL_PAW3222
+    compatible = "pixart,paw3222";
+    res-cpi = <1178>;
+#else
+    compatible = "pixart,pmw3610";
+    cpi = <600>;
+    evt-type = <INPUT_EV_REL>;
+    x-input-code = <INPUT_REL_X>;
+    y-input-code = <INPUT_REL_Y>;
+#endif
+};

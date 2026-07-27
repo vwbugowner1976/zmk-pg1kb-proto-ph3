@@ -1,0 +1,8 @@
+name: zmk-keyboard-pg1kb-proto
+build:
+  depends:
+    - zmk-driver-paw3222
+    - zmk-pmw3610-driver
+    - zmk-feature-non-lipo-battery-management
+  settings:
+    board_root: .

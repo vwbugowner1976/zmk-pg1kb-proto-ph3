@@ -1,0 +1,16 @@
+manifest:
+  remotes:
+    - name: sekigon-gonnoc
+      url-base: https://github.com/sekigon-gonnoc
+    - name: badjeff
+      url-base: https://github.com/badjeff
+  projects:
+    - name: zmk-driver-paw3222
+      remote: sekigon-gonnoc
+      revision: main
+    - name: zmk-pmw3610-driver
+      remote: badjeff
+      revision: zmk-0.3
+    - name: zmk-feature-non-lipo-battery-management
+      remote: sekigon-gonnoc
+      revision: main

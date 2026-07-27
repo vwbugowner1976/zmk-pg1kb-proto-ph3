@@ -1,0 +1,12 @@
+file_format: "1"
+id: pg1kb_proto
+name: PG1KB Proto
+type: shield
+requires: [seeed_xiao]
+features:
+  - keys
+  - pointer
+  - studio
+siblings:
+  - pg1kb_proto_left
+  - pg1kb_proto_right
