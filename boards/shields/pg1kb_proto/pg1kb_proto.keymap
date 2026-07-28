@@ -30,6 +30,21 @@
             bindings = <&kp ENTER>;
             key-positions = <27 28 29>;
         };
+
+        combo-bs-left {
+            bindings = <&kp BACKSPACE>;
+            key-positions = <22 23>;
+        };
+
+        combo-del-left {
+            bindings = <&kp DELETE>;
+            key-positions = <23 24>;
+        };
+
+        combo-enter-left {
+            bindings = <&kp ENTER>;
+            key-positions = <22 23 24>;
+        };
     };
 
     keymap {
@@ -38,44 +53,44 @@
         default_layer {
             display-name = "Base";
             bindings = <
-&kp ESC         &mkp MB4                                &mkp LCLK  &mkp RCLK    &mkp MCLK         &mkp LCLK                                &mkp MB5   &kp MINUS
-&kp TAB         &kp Q     &kp W         &kp E           &kp R      &kp T        &kp Y             &kp U      &kp I           &kp O         &kp P      &kp EQUAL
-&kp LCTRL       &kp A     &kp S         &kp D           &kp F      &kp G        &kp H             &kp J      &kp K           &kp L         &kp SEMI   &kp SINGLE_QUOTE
-&kp LEFT_SHIFT  &kp Z     &kp X         &kp C           &kp V      &kp B        &kp N             &kp M      &kp COMMA       &kp PERIOD    &kp SLASH  &kp BACKSLASH
-                          &kp LEFT_ALT  &lt 3 LEFT_GUI  &kp SPACE  &lt 1 LANG2  &lt 2 LANGUAGE_1  &kp ENTER  &kp LANGUAGE_1  &kp LEFT_GUI
+&kp ESC         &mkp MB4                                &mkp LCLK  &mkp RCLK      &mkp MCLK         &mkp LCLK                                &mkp MB5   &kp MINUS
+&kp TAB         &kp Q     &kp W         &kp E           &kp R      &kp T          &kp Y             &kp U      &kp I           &kp O         &kp P      &kp EQUAL
+&kp LCTRL       &kp A     &kp S         &kp D           &kp F      &kp G          &kp H             &kp J      &kp K           &kp L         &kp SEMI   &kp SINGLE_QUOTE
+&kp LEFT_SHIFT  &kp Z     &kp X         &kp C           &kp V      &kp B          &kp N             &kp M      &kp COMMA       &kp PERIOD    &kp SLASH  &kp BACKSLASH
+                          &kp LEFT_ALT  &lt 3 LEFT_GUI  &kp SPACE  &lt 1 LANG2    &lt 2 LANGUAGE_1  &kp ENTER  &kp LANGUAGE_1  &kp LEFT_GUI
             >;
         };
 
         layer_1 {
             display-name = "Num";
             bindings = <
-&trans  &trans                  &trans  &trans  &trans    &trans                       &trans        &kp BSPC
-&none   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5  &kp N6    &kp N7    &kp N8  &kp N9     &kp N0        &kp DEL
-&trans  &trans  &trans  &trans  &trans  &trans  &kp LEFT  &kp DOWN  &kp UP  &kp RIGHT  &kp COLON     &kp DOUBLE_QUOTES
-&trans  &trans  &trans  &trans  &trans  &trans  &trans    &trans    &trans  &trans     &kp QUESTION  &kp PIPE
-                &trans  &trans  &trans  &trans  &trans    &trans    &trans  &trans
+&trans  &trans                  &trans  &trans    &trans    &trans                       &trans        &kp BSPC
+&trans  &kp N1  &kp N2  &kp N3  &kp N4  &kp N5    &kp N6    &kp N7    &kp N8  &kp N9     &kp N0        &kp DEL
+&trans  &trans  &trans  &trans  &trans  &trans    &kp LEFT  &kp DOWN  &kp UP  &kp RIGHT  &kp COLON     &kp DOUBLE_QUOTES
+&trans  &trans  &trans  &trans  &trans  &trans    &trans    &trans    &trans  &trans     &kp QUESTION  &kp PIPE
+                &trans  &trans  &trans  &trans    &trans    &trans    &trans  &trans
             >;
         };
 
         layer_2 {
             display-name = "Sym";
             bindings = <
-&trans  &kp EXCLAMATION                         &trans                &trans         &trans            &trans                                         &kp END          &kp F12
-&trans  &kp QUESTION     &kp AT_SIGN  &kp HASH  &kp DOLLAR            &kp PERCENT    &kp LCTRL         &kp AMPERSAND          &kp ASTERISK  &kp HOME  &kp PRINTSCREEN  &trans
-&trans  &trans           &trans       &trans    &kp LEFT_BRACE        &kp LBKT       &kp RBKT          &kp RIGHT_BRACE        &trans        &trans    &trans           &trans
-&trans  &trans           &trans       &trans    &kp LEFT_PARENTHESIS  &kp LESS_THAN  &kp GREATER_THAN  &kp RIGHT_PARENTHESIS  &trans        &trans    &trans           &trans
-                         &trans       &trans    &trans                &trans         &trans            &trans                 &trans        &trans
+&kp GRAVE  &kp EXCL                             &trans                &trans           &trans            &trans                                         &kp END          &kp F12
+&kp TILDE  &kp QUESTION  &kp AT_SIGN  &kp HASH  &kp DOLLAR            &kp PERCENT      &kp CARET         &kp AMPERSAND          &kp ASTERISK  &kp HOME  &kp PRINTSCREEN  &trans
+&trans     &trans        &trans       &trans    &kp LEFT_BRACE        &kp LBKT         &kp RBKT          &kp RIGHT_BRACE        &trans        &trans    &trans           &trans
+&trans     &trans        &trans       &trans    &kp LEFT_PARENTHESIS  &kp LESS_THAN    &kp GREATER_THAN  &kp RIGHT_PARENTHESIS  &trans        &trans    &trans           &trans
+                         &trans       &trans    &trans                &trans           &trans            &trans                 &trans        &trans
             >;
         };
 
         layer_3 {
             display-name = "Sys";
             bindings = <
-&studio_unlock &sys_reset                                &bt BT_CLR    &bt BT_CLR_ALL  &trans  &trans                   &trans          &trans
-&trans         &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4    &trans  &kp N7  &kp N8  &kp N9   &kp ASTRK       &kp SLASH
-&trans         &trans        &trans        &trans        &trans        &trans          &trans  &kp N4  &kp N5  &kp N6   &kp PLUS        &kp MINUS
-&trans         &trans        &trans        &trans        &trans        &trans          &trans  &kp N1  &kp N2  &kp N3   &kp EQUAL       &trans
-                             &trans        &trans        &trans        &trans          &trans  &kp N0  &trans  &kp DOT
+&studio_unlock  &sys_reset                                &bt BT_CLR    &bt BT_CLR_ALL    &trans  &trans                            &trans           &trans
+&trans          &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4      &trans  &kp KP_N7  &kp KP_N8  &kp KP_N9   &kp KP_MULTIPLY  &kp KP_DIVIDE
+&trans          &trans        &trans        &trans        &trans        &trans            &trans  &kp KP_N4  &kp KP_N5  &kp KP_N6   &kp KP_PLUS      &kp KP_MINUS
+&trans          &trans        &trans        &trans        &trans        &trans            &trans  &kp KP_N1  &kp KP_N2  &kp KP_N3   &kp KP_EQUAL     &trans
+                              &trans        &trans        &trans        &trans            &trans  &kp KP_N0  &trans     &kp KP_DOT
             >;
         };
 

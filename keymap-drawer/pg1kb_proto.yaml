@@ -61,7 +61,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - BSPC
-  - ''
+  - {t: ▽, type: trans}
   - '1'
   - '2'
   - '3'
@@ -106,7 +106,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   Sym:
-  - {t: ▽, type: trans}
+  - '`'
   - '!'
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -114,13 +114,13 @@ layers:
   - {t: ▽, type: trans}
   - END
   - F12
-  - {t: ▽, type: trans}
+  - '~'
   - '?'
   - '@'
   - '#'
   - $
   - '%'
-  - LCTRL
+  - ^
   - '&'
   - '*'
   - HOME
@@ -174,11 +174,11 @@ layers:
   - {t: BT, h: '3'}
   - {t: BT, h: '4'}
   - {t: ▽, type: trans}
-  - '7'
-  - '8'
-  - '9'
-  - '*'
-  - /
+  - KP 7
+  - KP 8
+  - KP 9
+  - KP MULTIPLY
+  - KP DIVIDE
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -186,11 +186,11 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - '4'
-  - '5'
-  - '6'
-  - +
-  - '-'
+  - KP 4
+  - KP 5
+  - KP 6
+  - KP PLUS
+  - KP MINUS
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -198,19 +198,19 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - '1'
-  - '2'
-  - '3'
-  - '='
+  - KP 1
+  - KP 2
+  - KP 3
+  - KP EQUAL
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {type: held}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - '0'
+  - KP 0
   - {t: ▽, type: trans}
-  - .
+  - KP DOT
 combos:
 - p: [27, 28]
   k: BACKSPACE
@@ -219,5 +219,14 @@ combos:
   k: DELETE
   a: "bottom"
 - p: [27, 28, 29]
+  k: ENTER
+  a: "top"
+- p: [22, 23]
+  k: BACKSPACE
+  a: "bottom"
+- p: [23, 24]
+  k: DELETE
+  a: "bottom"
+- p: [22, 23, 24]
   k: ENTER
   a: "top"
