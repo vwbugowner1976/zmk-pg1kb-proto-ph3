@@ -13,6 +13,12 @@ PG1KB Proto (Page One Keyboard Prototype) のZMKファームウェア用モジ�
 - 右手側のBAT_CHECKピンを単4アルカリ乾電池の残量測定用ADCとして使用
 - 右手側（central）は ZMK Studio 対応
 
+## キーマップ
+
+![pg1kb_proto keymap](keymap-drawer/pg1kb_proto.svg)
+
+キーマップ定義は `boards/shields/pg1kb_proto/pg1kb_proto.keymap` です。SVG は `keymap-drawer/sync-keymap-drawer.sh` で更新できます。
+
 ## ZMK Studio
 
 [ZMK Studio](https://zmk.studio/) からキーマップをリアルタイムに書き換えられます。

@@ -45,20 +45,20 @@ layers:
   - /
   - \
   - LEFT ALT
-  - {t: LEFT GUI, h: Sys}
+  - LEFT GUI
   - SPACE
   - {t: LANG2, h: Num}
   - {t: LANGUAGE 1, h: Sym}
   - ENTER
-  - LANGUAGE 1
-  - LEFT GUI
+  - RCTRL
+  - RSHIFT
   Num:
   - {t: ▽, type: trans}
+  - '0'
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - Ctl+C
+  - Ctl+V
   - {t: ▽, type: trans}
   - BSPC
   - {t: ▽, type: trans}
@@ -203,7 +203,7 @@ layers:
   - KP 3
   - KP EQUAL
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - {type: held}
   - {type: held}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -214,19 +214,34 @@ layers:
 combos:
 - p: [27, 28]
   k: BACKSPACE
+  l: [Base]
   a: "bottom"
 - p: [28, 29]
   k: DELETE
+  l: [Base]
   a: "bottom"
 - p: [27, 28, 29]
   k: ENTER
+  l: [Base]
   a: "top"
 - p: [22, 23]
   k: BACKSPACE
+  l: [Base]
   a: "bottom"
 - p: [23, 24]
   k: DELETE
+  l: [Base]
   a: "bottom"
 - p: [22, 23, 24]
   k: ENTER
+  l: [Base]
   a: "top"
+- p: [4, 5]
+  k: Ctl+X
+  l: [Num]
+- p: [2, 3]
+  k: '&mkp MCLK'
+  l: [Base]
+- p: [44, 45]
+  k: Sys
+  l: [Base]

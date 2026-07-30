@@ -16,34 +16,65 @@
     combos {
         compatible = "zmk,combos";
 
+        /*
+         * layers はコンボ発火時の「最上位のアクティブレイヤー」と比較される。
+         * <0> は他のレイヤーを保持していない状態、つまり Base のみを意味する。
+         */
         combo-bs {
             bindings = <&kp BACKSPACE>;
             key-positions = <27 28>;
+            layers = <0>;
         };
 
         combo-del {
             bindings = <&kp DELETE>;
             key-positions = <28 29>;
+            layers = <0>;
         };
 
         combo-enter {
             bindings = <&kp ENTER>;
             key-positions = <27 28 29>;
+            layers = <0>;
         };
 
         combo-bs-left {
             bindings = <&kp BACKSPACE>;
             key-positions = <22 23>;
+            layers = <0>;
         };
 
         combo-del-left {
             bindings = <&kp DELETE>;
             key-positions = <23 24>;
+            layers = <0>;
         };
 
         combo-enter-left {
             bindings = <&kp ENTER>;
             key-positions = <22 23 24>;
+            layers = <0>;
+        };
+
+        /* Num レイヤーのコピー + ペースト同時押しでカット */
+        combo-cut {
+            bindings = <&kp LC(X)>;
+            key-positions = <4 5>;
+            layers = <1>;
+        };
+
+        /* 左クリック + 右クリック同時押しでミドルクリック */
+        combo-mclk {
+            bindings = <&mkp MCLK>;
+            key-positions = <2 3>;
+            layers = <0>;
+        };
+
+        /* 左手最下段の LEFT_ALT + LEFT_GUI 同時押しで Sys レイヤー（押している間だけ） */
+        combo-sys {
+            bindings = <&mo 3>;
+            key-positions = <44 45>;
+            layers = <0>;
         };
     };
 
@@ -53,22 +84,22 @@
         default_layer {
             display-name = "Base";
             bindings = <
-&kp ESC         &mkp MB4                                &mkp LCLK  &mkp RCLK      &mkp MCLK         &mkp LCLK                                &mkp MB5   &kp MINUS
-&kp TAB         &kp Q     &kp W         &kp E           &kp R      &kp T          &kp Y             &kp U      &kp I           &kp O         &kp P      &kp EQUAL
-&kp LCTRL       &kp A     &kp S         &kp D           &kp F      &kp G          &kp H             &kp J      &kp K           &kp L         &kp SEMI   &kp SINGLE_QUOTE
-&kp LEFT_SHIFT  &kp Z     &kp X         &kp C           &kp V      &kp B          &kp N             &kp M      &kp COMMA       &kp PERIOD    &kp SLASH  &kp BACKSLASH
-                          &kp LEFT_ALT  &lt 3 LEFT_GUI  &kp SPACE  &lt 1 LANG2    &lt 2 LANGUAGE_1  &kp ENTER  &kp LANGUAGE_1  &kp LEFT_GUI
+&kp ESC         &mkp MB4                              &mkp LCLK  &mkp RCLK      &mkp MCLK         &mkp LCLK                         &mkp MB5   &kp MINUS
+&kp TAB         &kp Q     &kp W         &kp E         &kp R      &kp T          &kp Y             &kp U      &kp I      &kp O       &kp P      &kp EQUAL
+&kp LCTRL       &kp A     &kp S         &kp D         &kp F      &kp G          &kp H             &kp J      &kp K      &kp L       &kp SEMI   &kp SINGLE_QUOTE
+&kp LEFT_SHIFT  &kp Z     &kp X         &kp C         &kp V      &kp B          &kp N             &kp M      &kp COMMA  &kp PERIOD  &kp SLASH  &kp BACKSLASH
+                          &kp LEFT_ALT  &kp LEFT_GUI  &kp SPACE  &lt 1 LANG2    &lt 2 LANGUAGE_1  &kp ENTER  &kp RCTRL  &kp RSHIFT
             >;
         };
 
         layer_1 {
             display-name = "Num";
             bindings = <
-&trans  &trans                  &trans  &trans    &trans    &trans                       &trans    &kp BSPC
-&trans  &kp N1  &kp N2  &kp N3  &kp N4  &kp N5    &kp N6    &kp N7    &kp N8  &kp N9     &kp N0    &kp DEL
-&trans  &trans  &trans  &trans  &trans  &trans    &kp LEFT  &kp DOWN  &kp UP  &kp RIGHT  &trans    &trans
-&trans  &kp F1  &kp F2  &kp F3  &kp F4  &kp F5    &kp F6    &kp F7    &kp F8  &kp F9     &kp F10   &kp F11
-                &trans  &trans  &trans  &trans    &trans    &trans    &trans  &trans
+&trans  &kp N0                  &trans  &trans    &kp LC(C)  &kp LC(V)                     &trans   &kp BSPC
+&trans  &kp N1  &kp N2  &kp N3  &kp N4  &kp N5    &kp N6     &kp N7     &kp N8  &kp N9     &kp N0   &kp DEL
+&trans  &trans  &trans  &trans  &trans  &trans    &kp LEFT   &kp DOWN   &kp UP  &kp RIGHT  &trans   &trans
+&trans  &kp F1  &kp F2  &kp F3  &kp F4  &kp F5    &kp F6     &kp F7     &kp F8  &kp F9     &kp F10  &kp F11
+                &trans  &trans  &trans  &trans    &trans     &trans     &trans  &trans
             >;
         };
 
@@ -109,15 +140,59 @@
     };
 };
 
+/*
+ * トラックボールの役割：
+ *
+ *            左ボール              右ボール
+ *   Base     スクロール  1/16      カーソル    3/2
+ *   Num      カーソル    3/2       精密カーソル 1/2   ← 両手でポインタ操作
+ *   Sym      精密スクロール 1/48   スクロール  1/16   ← 両手でスクロール操作
+ *
+ * 「精密」は通常の 1/3 の速さ（カーソル 3/2 → 1/2、スクロール 1/16 → 1/48）。
+ * zip_*_scaler は <乗数 除数> で余りを繰り越すので、分数倍でも動きは失われない。
+ *
+ * スクロールとカーソル移動では Y の符号の意味が逆（REL_Y は正が下、
+ * REL_WHEEL は正が上）なので、そのボールの本来の役割と違う側に Y_INVERT を足す。
+ */
 &left_trackball_listener {
     input-processors =
         <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
         <&zip_xy_to_scroll_mapper>,
         <&zip_scroll_scaler 1 16>;
+
+    move_on_num {
+        layers = <1>;
+        input-processors =
+            <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_Y_INVERT)>,
+            <&zip_xy_scaler 3 2>;
+    };
+
+    precise_scroll_on_sym {
+        layers = <2>;
+        input-processors =
+            <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
+            <&zip_xy_to_scroll_mapper>,
+            <&zip_scroll_scaler 1 48>;
+    };
 };
 
 &right_trackball_listener {
     input-processors =
         <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT)>,
         <&zip_xy_scaler 3 2>;
+
+    precise_move_on_num {
+        layers = <1>;
+        input-processors =
+            <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT)>,
+            <&zip_xy_scaler 1 2>;
+    };
+
+    scroll_on_sym {
+        layers = <2>;
+        input-processors =
+            <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
+            <&zip_xy_to_scroll_mapper>,
+            <&zip_scroll_scaler 1 16>;
+    };
 };
