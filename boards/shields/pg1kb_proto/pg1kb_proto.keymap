@@ -144,12 +144,17 @@
  * トラックボールの役割：
  *
  *            左ボール              右ボール
- *   Base     スクロール  1/16      カーソル    3/2
+ *   Base     スクロール  等倍      カーソル    3/2
  *   Num      カーソル    3/2       精密カーソル 1/2   ← 両手でポインタ操作
- *   Sym      精密スクロール 1/48   スクロール  1/16   ← 両手でスクロール操作
+ *   Sym      精密スクロール 1/3    スクロール  等倍   ← 両手でスクロール操作
  *
- * 「精密」は通常の 1/3 の速さ（カーソル 3/2 → 1/2、スクロール 1/16 → 1/48）。
+ * 「精密」は通常の 1/3 の速さ（カーソル 3/2 → 1/2、スクロール 等倍 → 1/3）。
  * zip_*_scaler は <乗数 除数> で余りを繰り越すので、分数倍でも動きは失われない。
+ *
+ * スムーススクロール（CONFIG_ZMK_POINTING_SMOOTH_SCROLLING）を有効にしているため、
+ * ホストは wheel 16 単位を 1 ノッチとして扱う。非スムース時の 1/16・1/48 を
+ * それぞれ 16 倍した 等倍・1/3 が、従来と同じスクロール量に相当する。
+ * 等倍の側は zip_scroll_scaler 自体を省いている。
  *
  * スクロールとカーソル移動では Y の符号の意味が逆（REL_Y は正が下、
  * REL_WHEEL は正が上）なので、そのボールの本来の役割と違う側に Y_INVERT を足す。
@@ -157,8 +162,7 @@
 &left_trackball_listener {
     input-processors =
         <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
-        <&zip_xy_to_scroll_mapper>,
-        <&zip_scroll_scaler 1 16>;
+        <&zip_xy_to_scroll_mapper>;
 
     move_on_num {
         layers = <1>;
@@ -172,7 +176,7 @@
         input-processors =
             <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
             <&zip_xy_to_scroll_mapper>,
-            <&zip_scroll_scaler 1 48>;
+            <&zip_scroll_scaler 1 3>;
     };
 };
 
@@ -192,7 +196,6 @@
         layers = <2>;
         input-processors =
             <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
-            <&zip_xy_to_scroll_mapper>,
-            <&zip_scroll_scaler 1 16>;
+            <&zip_xy_to_scroll_mapper>;
     };
 };
