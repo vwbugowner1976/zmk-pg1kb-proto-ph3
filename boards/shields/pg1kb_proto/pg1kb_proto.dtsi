@@ -44,6 +44,15 @@
      * stop は README の式「出力頻度(Hz) ≒ stop * scale * 125 / scale-div」から、
      * スムーススクロール時の 16 単位 = 1 ノッチ換算で切れ際が約 3.9 ノッチ/s に揃う値。
      * デフォルト stop = 7 では 1/2 チェーンで約 13.7 ノッチ/s になり、手前で止まりすぎる。
+     *
+     * 発動条件（start / move / min-events）はデフォルトだと強めに弾かないと慣性が
+     * 乗らなかったので下げている。3 ノードとも zip_xy_to_scroll_mapper の直後で
+     * スケール前の生の値を見るため、しきい値は共通で問題ない。
+     *   start      40 →  25  ピーク速度のしきい値（弾く強さ）
+     *   move       80 →  50  ジェスチャー内の累積移動量（振り幅）
+     *   min-events 10 →   6  アームに必要なイベント数。125Hz なので 10 だと 80ms 以上
+     *                        ボールを回し続ける必要があり、短いフリックが弾かれていた
+     * 逆に軽く触っただけで慣性が乗るようなら、この 3 つを戻す方向に上げる。
      */
     scroll_inertia_left_base: scroll_inertia_left_base {
         compatible = "zmk,input-processor-scroll-inertia";
@@ -53,6 +62,9 @@
         scale = <1>;
         scale-div = <2>;
         stop = <2>;
+        start = <25>;
+        move = <50>;
+        min-events = <6>;
     };
 
     scroll_inertia_left_sym: scroll_inertia_left_sym {
@@ -64,6 +76,9 @@
         scale = <1>;
         scale-div = <6>;
         stop = <3>;
+        start = <25>;
+        move = <50>;
+        min-events = <6>;
     };
 
     scroll_inertia_right_sym: scroll_inertia_right_sym {
@@ -75,6 +90,9 @@
         scale = <1>;
         scale-div = <2>;
         stop = <2>;
+        start = <25>;
+        move = <50>;
+        min-events = <6>;
     };
 
     pg1kb_proto_physical_layout: physical_layout_0 {
