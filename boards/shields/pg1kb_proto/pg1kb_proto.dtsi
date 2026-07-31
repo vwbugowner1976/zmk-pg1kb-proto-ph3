@@ -29,6 +29,54 @@
         device = <&trackball>;
     };
 
+    /*
+     * scroll-inertia は split peripheral ではコンパイルできない central 専用プロセッサ。
+     * ただし keymap は左右共通で読むため、左手ビルドでも &scroll_inertia_* のラベル自体は
+     * 解決できる必要がある。ここでは disabled で共有定義し、右手 overlay だけで okay にする。
+     *
+     * axis = <0> は両軸フリー。現在の zip_xy_to_scroll_mapper は縦横同時の 2D スクロールを
+     * 流すため、軸ロックはかけない。
+     *
+     * 左ボール Base は専用スクロールレイヤーではなく listener のデフォルトチェーンなので、
+     * layer は省略して -1 相当とする。このため Base でフリック直後に Sym へ切り替えると、
+     * 慣性は gesture-timeout / 自然減衰 / span で止まるまで流れ続ける。
+     *
+     * stop は README の式「出力頻度(Hz) ≒ stop * scale * 125 / scale-div」から、
+     * スムーススクロール時の 16 単位 = 1 ノッチ換算で切れ際が約 3.9 ノッチ/s に揃う値。
+     * デフォルト stop = 7 では 1/2 チェーンで約 13.7 ノッチ/s になり、手前で止まりすぎる。
+     */
+    scroll_inertia_left_base: scroll_inertia_left_base {
+        compatible = "zmk,input-processor-scroll-inertia";
+        #input-processor-cells = <0>;
+        status = "disabled";
+        axis = <0>;
+        scale = <1>;
+        scale-div = <2>;
+        stop = <2>;
+    };
+
+    scroll_inertia_left_sym: scroll_inertia_left_sym {
+        compatible = "zmk,input-processor-scroll-inertia";
+        #input-processor-cells = <0>;
+        status = "disabled";
+        axis = <0>;
+        layer = <2>;
+        scale = <1>;
+        scale-div = <6>;
+        stop = <3>;
+    };
+
+    scroll_inertia_right_sym: scroll_inertia_right_sym {
+        compatible = "zmk,input-processor-scroll-inertia";
+        #input-processor-cells = <0>;
+        status = "disabled";
+        axis = <0>;
+        layer = <2>;
+        scale = <1>;
+        scale-div = <2>;
+        stop = <2>;
+    };
+
     pg1kb_proto_physical_layout: physical_layout_0 {
         compatible = "zmk,physical-layout";
         display-name = "Default 5x12 Split Layout";

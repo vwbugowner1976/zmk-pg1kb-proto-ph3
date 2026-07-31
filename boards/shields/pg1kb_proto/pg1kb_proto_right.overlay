@@ -40,6 +40,18 @@
     status = "okay";
 };
 
+&scroll_inertia_left_base {
+    status = "okay";
+};
+
+&scroll_inertia_left_sym {
+    status = "okay";
+};
+
+&scroll_inertia_right_sym {
+    status = "okay";
+};
+
 &kscan0 {
     row-gpios
         = <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
