@@ -12,6 +12,8 @@ PG1KB Proto (Page One Keyboard Prototype) のZMKファームウェア用モジ�
 - 両手とも overlay の `#define` で PMW3610 に切り替え可能
 - 右手側のBAT_CHECKピンを単4アルカリ乾電池の残量測定用ADCとして使用
 - 右手側（central）は ZMK Studio 対応
+- 15分で Deep Sleep へ移行。キーの押下で復帰しない場合は、右手側のRESETボタンを押すことで復帰
+- スクロールはスムーススクロール（HID Resolution Multiplier）＋慣性スクロールに対応
 
 ## キーマップ
 
@@ -53,6 +55,50 @@ PAW3222 と PMW3610 は同じ SCLK / SDIO / CS / MOTION 配線を使いますが
 | 解像度 | `res-cpi` | `cpi` |
 | 必須 | `irq-gpios` | `irq-gpios`, `evt-type`, `x-input-code`, `y-input-code` |
 | 非対応 | `cpi` / `evt-type` / `x-input-code` / `y-input-code` | `res-cpi` |
+
+## トラックボールの役割
+
+左右のボールはレイヤーごとに役割が変わります。入力プロセッサのチェーンは `pg1kb_proto.keymap` の末尾で定義しています。
+
+| レイヤー | 左ボール | 右ボール | ねらい |
+| --- | --- | --- | --- |
+| Base | スクロール 1/2 + 慣性 | カーソル 3/2 | 左でスクロール、右でポインタ |
+| Num | カーソル 3/2 | 精密カーソル 1/2 | 両手でポインタ操作 |
+| Sym | 精密スクロール 1/6 + 慣性 | スクロール 1/2 + 慣性 | 両手でスクロール操作 |
+
+「精密」は通常の 1/3 の速さです。`zip_*_scaler` は `<乗数 除数>` で余りを繰り越すので、分数倍でも動きは失われません。
+
+スクロールとカーソル移動では Y の符号の意味が逆（`REL_Y` は正が下、`REL_WHEEL` は正が上）なので、そのボールの本来の役割と違う側に `Y_INVERT` を足しています。
+
+### スムーススクロール
+
+右手側（central）で `CONFIG_ZMK_POINTING_SMOOTH_SCROLLING=y` を有効にしています。HID Resolution Multiplier によってホストは wheel 16 単位を 1 ノッチとして扱うため、スクロールが段階的ではなく滑らかになります。HIDレポートを送るのは central 側だけなので、この設定も右手側の `.conf` にのみ書きます。
+
+### 慣性スクロール
+
+[zmk-input-processor-scroll-inertia](https://github.com/mjmjm0101/zmk-input-processor-scroll-inertia) により、ボールを弾いて離した後もiOS風に惰性でスクロールが続きます。
+
+設定は `pg1kb_proto.dtsi` の `scroll_inertia_left_base` / `scroll_inertia_left_sym` / `scroll_inertia_right_sym` の3ノードです。
+
+**このプロセッサは central 専用です。** HIDへ直接書き込む実装のため split peripheral ではコンパイルできず、左手ビルドに `status = "okay"` のノードが残るとモジュール側の `#error` でビルドが落ちます。一方で `pg1kb_proto.keymap` は左右共通で読まれるため、左手ビルドでも `&scroll_inertia_*` のラベル自体は解決できる必要があります。そこで **ノードは `pg1kb_proto.dtsi` に `status = "disabled"` で共有定義し、`pg1kb_proto_right.overlay` でのみ `okay` にする**という形をとっています（トラックボールの listener と同じ流儀）。
+
+慣性の出力は後段のプロセッサを通らずHIDへ直接書き込まれるので、**プロセッサは `zip_scroll_scaler` の手前に置き、`scale` / `scale-div` をその scaler の2引数と一致させます。** ここがズレると、ボールを回している間のスクロール速度と慣性の速度が食い違います。
+
+主な設定値（デフォルトから変更しているものだけ）:
+
+| プロパティ | 値 | 意味 |
+| --- | --- | --- |
+| `axis` | `0` | 両軸フリー（2Dスクロール）。軸ロックはかけない |
+| `layer` | `2`（Symの2ノードのみ） | このレイヤーがオフになった瞬間に状態をリセット |
+| `scale` / `scale-div` | `1`/`2`、`1`/`6` | 後段の `zip_scroll_scaler` の引数と一致させる |
+| `stop` | `2` / `3` | 慣性を打ち切る速度。切れ際が約 3.9 ノッチ/s に揃う値 |
+| `start` | `25` | 発動に必要なピーク速度（弾く強さ）。デフォルト40 |
+| `move` | `50` | 発動に必要な累積移動量（振り幅）。デフォルト80 |
+| `min-events` | `6` | アームに必要なイベント数。デフォルト10では短いフリックが弾かれた |
+
+左ボールのBaseだけ `layer` を指定していません。ここは専用スクロールレイヤーではなく listener のデフォルトチェーンだからです。そのためBaseでフリックした直後にSymへ切り替えると、慣性は `gesture-timeout` / 自然減衰 / `span` で止まるまで流れ続けます。
+
+感触の調整は `start` / `move`（発動しやすさ）、`decay-fast` / `decay-slow` / `decay-tail`（尾の長さ）、`friction`（小さいフリックの止まり方）、`stop`（切れ際）で行います。詳細はモジュールの [README_ja.md](https://github.com/mjmjm0101/zmk-input-processor-scroll-inertia/blob/main/README_ja.md) を参照してください。
 
 ## 右手側ピン配置
 
@@ -122,3 +168,4 @@ PAW3222 と PMW3610 は同じ SCLK / SDIO / CS / MOTION 配線を使いますが
 | [zmk-driver-paw3222](https://github.com/sekigon-gonnoc/zmk-driver-paw3222) | Apache-2.0 | PAW3222 トラックボールドライバー。元コードは Google LLC (Zephyr Project) 著作権、sekigon-gonnoc により改変 |
 | [zmk-pmw3610-driver](https://github.com/badjeff/zmk-pmw3610-driver) | MIT | PMW3610 トラックボールドライバー。badjeff 著作権 |
 | [zmk-feature-non-lipo-battery-management](https://github.com/sekigon-gonnoc/zmk-feature-non-lipo-battery-management) | MIT | 単4アルカリなど非LiPo電池向けの残量測定 |
+| [zmk-input-processor-scroll-inertia](https://github.com/mjmjm0101/zmk-input-processor-scroll-inertia) | MIT | 慣性スクロールの入力プロセッサ。mjmjm0101 著作権 |
