@@ -4,7 +4,7 @@
 include:
   - board: seeeduino_xiao_ble
     shield: pg1kb_proto_right
-    snippet: studio-rpc-usb-uart
+    snippet: studio-rpc-usb-uart zmk-usb-logging
     cmake-args: -DCONFIG_ZMK_STUDIO=y
     artifact-name: pg1kb_proto_right
   - board: seeeduino_xiao_ble
