@@ -8,6 +8,10 @@ manifest:
       url-base: https://github.com/badjeff
     - name: mjmjm0101
       url-base: https://github.com/mjmjm0101
+    # non-lipo モジュールの ZMK_SLEEP 強制解除を待つ間だけ使う fork。
+    # 本家に取り込まれたら sekigon-gonnoc/main に戻すこと。
+    - name: snize
+      url-base: https://github.com/snize
   projects:
     - name: zmk
       remote: zmkfirmware
@@ -20,8 +24,8 @@ manifest:
       remote: badjeff
       revision: zmk-0.3
     - name: zmk-feature-non-lipo-battery-management
-      remote: sekigon-gonnoc
-      revision: main
+      remote: snize
+      revision: fix/do-not-force-zmk-sleep
     - name: zmk-input-processor-scroll-inertia
       remote: mjmjm0101
       revision: main
