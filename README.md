@@ -12,7 +12,7 @@ PG1KB Proto (Page One Keyboard Prototype) のZMKファームウェア用モジ�
 - 両手とも overlay の `#define` で PMW3610 に切り替え可能
 - 右手側のBAT_CHECKピンを単4アルカリ乾電池の残量測定用ADCとして使用
 - 右手側（central）は ZMK Studio 対応
-- 15分で Deep Sleep へ移行。キーの押下で復帰しない場合は、右手側のRESETボタンを押すことで復帰
+- 1時間の無操作で Deep Sleep へ移行（`.conf` で時間変更・無効化が可能）。キーの押下で復帰しない場合は、右手側のRESETボタンを押すことで復帰
 - スクロールはスムーススクロール（HID Resolution Multiplier）＋慣性スクロールに対応
 
 ## キーマップ
@@ -156,6 +156,36 @@ PAW3222 と PMW3610 は同じ SCLK / SDIO / CS / MOTION 配線を使いますが
 
 残量計算には [zmk-feature-non-lipo-battery-management](https://github.com/sekigon-gonnoc/zmk-feature-non-lipo-battery-management) を使います。`pg1kb_proto_right.conf` では単4アルカリ向けに `1000mV = 0%`、`1500mV = 100%`、`1000mV` 以下を低電圧として設定しています。
 
+## Deep Sleep
+
+USB給電がない状態で1時間操作がないと Deep Sleep へ移行します。設定は左右それぞれの `.conf` に書いています。**左右は独立して眠る**ので、片方だけに書いても意図した動作になりません。
+
+```conf
+CONFIG_ZMK_SLEEP=y
+CONFIG_ZMK_IDLE_SLEEP_TIMEOUT=3600000
+```
+
+Deep Sleep の実体は Zephyr の `sys_poweroff()`（nRF52840 では System OFF）で、「深く眠る」というより**ほぼ電源を切る**動作です。RAMの内容は失われ、復帰はリセット相当の再起動になります。キーの押下で復帰しない場合は右手側のRESETボタンを押してください。
+
+### 無効にする
+
+眠らせたくない場合は、左右両方の `.conf` の2行をコメントアウトします。
+
+```conf
+# CONFIG_ZMK_SLEEP=y
+# CONFIG_ZMK_IDLE_SLEEP_TIMEOUT=3600000
+```
+
+時間だけ変えたい場合は `CONFIG_ZMK_IDLE_SLEEP_TIMEOUT` をミリ秒で指定します（15分なら `900000`）。ZMK 側の経過時間の計算が `int32_t` なので、指定できる上限は `2147483647`（約24.8日）です。
+
+### non-LiPo モジュールの fork を参照している理由
+
+[zmk-feature-non-lipo-battery-management](https://github.com/sekigon-gonnoc/zmk-feature-non-lipo-battery-management) は `Kconfig` で `select ZMK_SLEEP` を書いており、電池残量測定を有効にすると Deep Sleep が**強制的に有効化**されていました。Kconfig の `select` は無条件なので、`.conf` に `CONFIG_ZMK_SLEEP=n` と書いても無効化できません（従来この機体が15分で眠っていたのはこのためで、明示的にそう設定していたわけではありません）。
+
+モジュールが実際に必要としているのは低電圧シャットダウンで使う `sys_poweroff()` と `zmk_pm_suspend_devices()` の依存（`POWEROFF` / `PM_DEVICE` / `ZMK_PM_DEVICE_SUSPEND_RESUME`）だけで、`ZMK_SLEEP` は不要です。ZMK 本体の `ZMK_PM_SOFT_OFF` も同じ `sys_poweroff()` を使いながら、これらを個別に select していて `ZMK_SLEEP` は select していません。
+
+そこで [snize/zmk-feature-non-lipo-battery-management](https://github.com/snize/zmk-feature-non-lipo-battery-management) の `fix/do-not-force-zmk-sleep` ブランチでこれを修正し、`west.yml` から参照しています。**本家に取り込まれたら `remote: sekigon-gonnoc` / `revision: main` に戻してください。**
+
 ## ライセンス
 
 このモジュール自体は MIT ライセンスです。
@@ -167,5 +197,5 @@ PAW3222 と PMW3610 は同じ SCLK / SDIO / CS / MOTION 配線を使いますが
 | [ZMK Firmware](https://github.com/zmkfirmware/zmk) | MIT | キーボードファームウェア本体 |
 | [zmk-driver-paw3222](https://github.com/sekigon-gonnoc/zmk-driver-paw3222) | Apache-2.0 | PAW3222 トラックボールドライバー。元コードは Google LLC (Zephyr Project) 著作権、sekigon-gonnoc により改変 |
 | [zmk-pmw3610-driver](https://github.com/badjeff/zmk-pmw3610-driver) | MIT | PMW3610 トラックボールドライバー。badjeff 著作権 |
-| [zmk-feature-non-lipo-battery-management](https://github.com/sekigon-gonnoc/zmk-feature-non-lipo-battery-management) | MIT | 単4アルカリなど非LiPo電池向けの残量測定 |
+| [zmk-feature-non-lipo-battery-management](https://github.com/sekigon-gonnoc/zmk-feature-non-lipo-battery-management) | MIT | 単4アルカリなど非LiPo電池向けの残量測定。現在は snize の fork を参照（[Deep Sleep](#non-lipo-モジュールの-fork-を参照している理由) 参照） |
 | [zmk-input-processor-scroll-inertia](https://github.com/mjmjm0101/zmk-input-processor-scroll-inertia) | MIT | 慣性スクロールの入力プロセッサ。mjmjm0101 著作権 |
