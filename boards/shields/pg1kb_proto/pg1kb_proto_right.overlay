@@ -114,3 +114,5 @@
     y-input-code = <INPUT_REL_Y>;
 #endif
 };
+
+&vbatt { status = "disabled";};
