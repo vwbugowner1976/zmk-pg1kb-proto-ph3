@@ -12,7 +12,7 @@ manifest:
     # 本家に取り込まれたら sekigon-gonnoc/main に戻すこと。
     - name: snize
       url-base: https://github.com/snize
-      - name: vwbugowner1976
+    - name: vwbugowner1976
       url-base: https://github.com/vwbugowner1976
   projects:
     - name: zmk
