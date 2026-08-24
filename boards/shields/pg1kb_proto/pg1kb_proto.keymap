@@ -1,4 +1,5 @@
 #include <input/processors.dtsi>
+#include <input/processors/runtime-input-processor.dtsi>
 #include <dt-bindings/zmk/input_transform.h>
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
@@ -165,13 +166,15 @@
         <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
         <&zip_xy_to_scroll_mapper>,
         <&scroll_inertia_left_base>,
-        <&zip_scroll_scaler 1 2>;
+        <&zip_scroll_scaler 1 2>,
+        <&scroll_runtime_input_processor>;
 
     move_on_num {
         layers = <1>;
         input-processors =
             <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_Y_INVERT)>,
-            <&zip_xy_scaler 3 2>;
+            <&zip_xy_scaler 3 2>,
+            <&mouse_runtime_input_processor>;
     };
 
     precise_scroll_on_sym {
@@ -180,7 +183,8 @@
             <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
             <&zip_xy_to_scroll_mapper>,
             <&scroll_inertia_left_sym>,
-            <&zip_scroll_scaler 1 6>;
+            <&zip_scroll_scaler 1 6>,
+            <&scroll_runtime_input_processor>;
     };
 };
 
@@ -188,13 +192,15 @@
     /* デフォルト（カーソル）チェーンは変更なし */
     input-processors =
         <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT)>,
-        <&zip_xy_scaler 3 2>;
+        <&zip_xy_scaler 3 2>,
+        <&mouse_runtime_input_processor>;
 
     precise_move_on_num {
         layers = <1>;
         input-processors =
             <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT)>,
-            <&zip_xy_scaler 1 2>;
+            <&zip_xy_scaler 1 2>,
+            <&mouse_runtime_input_processor>;
     };
 
     scroll_on_sym {
@@ -203,6 +209,7 @@
             <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
             <&zip_xy_to_scroll_mapper>,
             <&scroll_inertia_right_sym>,
-            <&zip_scroll_scaler 1 2>;
+            <&zip_scroll_scaler 1 2>,
+            <&scroll_runtime_input_processor>;
     };
 };
