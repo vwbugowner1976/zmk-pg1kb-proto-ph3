@@ -40,6 +40,13 @@
     status = "okay";
 };
 
+&rip_lscr { status = "okay"; };
+&rip_lmov { status = "okay"; };
+&rip_lpre { status = "okay"; };
+&rip_rmov { status = "okay"; };
+&rip_rpre { status = "okay"; };
+&rip_rscr { status = "okay"; };
+
 &scroll_inertia_left_base {
     status = "okay";
 };
