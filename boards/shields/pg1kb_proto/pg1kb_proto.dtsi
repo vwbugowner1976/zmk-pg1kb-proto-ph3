@@ -1,4 +1,5 @@
 #include <dt-bindings/zmk/matrix_transform.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
 #include <physical_layouts.dtsi>
 
 / {
@@ -27,6 +28,93 @@
         compatible = "zmk,input-listener";
         status = "disabled";
         device = <&trackball>;
+    };
+
+    /*
+     * Runtime input processors are defined here but enabled only on the central
+     * (right) half. Direction/orientation correction stays in the keymap's
+     * zip_xy_transform chain; these processors own runtime scale and optional
+     * XY-to-scroll conversion so My Keeb Studio can tune each mode live.
+     */
+    rip_lscr: rip_lscr {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "lscroll";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <2>;
+        xy-to-scroll-enabled;
+        track-remainders;
+        #input-processor-cells = <0>;
+    };
+
+    rip_lmov: rip_lmov {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "lmove";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <3>;
+        scale-divisor = <2>;
+        track-remainders;
+        #input-processor-cells = <0>;
+    };
+
+    rip_lpre: rip_lpre {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "lprec";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <6>;
+        xy-to-scroll-enabled;
+        track-remainders;
+        #input-processor-cells = <0>;
+    };
+
+    rip_rmov: rip_rmov {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "rmove";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <3>;
+        scale-divisor = <2>;
+        track-remainders;
+        #input-processor-cells = <0>;
+    };
+
+    rip_rpre: rip_rpre {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "rprec";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <2>;
+        track-remainders;
+        #input-processor-cells = <0>;
+    };
+
+    rip_rscr: rip_rscr {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "rscroll";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <2>;
+        xy-to-scroll-enabled;
+        track-remainders;
+        #input-processor-cells = <0>;
     };
 
     /*
