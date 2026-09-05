@@ -14,11 +14,16 @@ manifest:
       url-base: https://github.com/snize
     - name: vwbugowner1976
       url-base: https://github.com/vwbugowner1976
+    - name: cormoran
+      url-base: https://github.com/cormoran
+    - name: prospector
+      url-base: https://github.com/t-ogura
   projects:
     - name: zmk
-      remote: zmkfirmware
-      revision: v0.3.0
-      import: app/west.yml
+      remote: cormoran
+      revision: v0.3+custom-studio-protocol
+      import:
+        file: app/west.yml
     - name: zmk-driver-paw3222
       remote: vwbugowner1976
       revision: main
@@ -31,5 +36,15 @@ manifest:
     - name: zmk-input-processor-scroll-inertia
       remote: mjmjm0101
       revision: main
+    - name: zmk-feature-custom-settings
+      remote: cormoran
+      revision: main
+    - name: zmk-module-runtime-input-processor
+      remote: cormoran
+      revision: main
+    - name: prospector-zmk-module
+      remote: prospector
+      revision: v2.2.1
+      path: modules/prospector-zmk-module
   self:
     path: config
