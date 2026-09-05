@@ -144,9 +144,13 @@
  * トラックボールの役割：
  *
  *            左ボール                   右ボール
- *   Base     スクロール     1/2 + 慣性  カーソル      3/2
- *   Num      カーソル       3/2         精密カーソル  1/2         ← 両手でポインタ操作
- *   Sym      精密スクロール 1/6 + 慣性  スクロール    1/2 + 慣性  ← 両手でスクロール操作
+ *   Base     スクロール     1/2          カーソル      3/2
+ *   Num      カーソル       3/2          精密カーソル  1/2         ← 両手でポインタ操作
+ *   Sym      精密スクロール 1/6          スクロール    1/2         ← 両手でスクロール操作
+ *
+ * 速度倍率と XY→scroll 変換は runtime input processor が担当する。
+ * My Keeb Studio から lscroll/lmove/lprec/rmove/rprec/rscroll を個別調整できる。
+ * センサーの向き補正は実機で確認済みの zip_xy_transform を前段に残している。
  *
  * 「精密」は通常の 1/3 の速さ（カーソル 3/2 → 1/2、スクロール 1/2 → 1/6）。
  * zip_*_scaler は <乗数 除数> で余りを繰り越すので、分数倍でも動きは失われない。
@@ -179,22 +183,20 @@
 &left_trackball_listener {
     input-processors =
         <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
-        <&zip_xy_to_scroll_mapper>,
-        <&zip_scroll_scaler 1 2>;
+        <&rip_lscr>;
 
     move_on_num {
         layers = <1>;
         input-processors =
             <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_Y_INVERT)>,
-            <&zip_xy_scaler 3 2>;
+            <&rip_lmov>;
     };
 
     precise_scroll_on_sym {
         layers = <2>;
         input-processors =
             <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
-            <&zip_xy_to_scroll_mapper>,
-            <&zip_scroll_scaler 1 6>;
+            <&rip_lpre>;
     };
 };
 
@@ -202,20 +204,19 @@
     /* デフォルト（カーソル）はセンサーの軸がそのまま使えるので変換なし */
     input-processors =
         <&zip_xy_transform 0>,
-        <&zip_xy_scaler 3 2>;
+        <&rip_rmov>;
 
     precise_move_on_num {
         layers = <1>;
         input-processors =
             <&zip_xy_transform 0>,
-            <&zip_xy_scaler 1 2>;
+            <&rip_rpre>;
     };
 
     scroll_on_sym {
         layers = <2>;
         input-processors =
             <&zip_xy_transform INPUT_TRANSFORM_Y_INVERT>,
-            <&zip_xy_to_scroll_mapper>,
-            <&zip_scroll_scaler 1 2>;
+            <&rip_rscr>;
     };
 };
