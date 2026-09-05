@@ -46,5 +46,8 @@ manifest:
       remote: prospector
       revision: v2.2.1
       path: modules/prospector-zmk-module
+    - name: zmk-behavior-jpkeysforuslayout
+      remote: vwbugowner1976
+      revision: main
   self:
-    path: config
+    path: zmk-pg1kb-proto-ph3
