@@ -38,6 +38,19 @@
 
 &right_trackball_listener {
     status = "okay";
+
+    /*
+     * My Keeb Studio runtime speed first, then inertia.
+     * rscroll already performs Y inversion's downstream XY->scroll mapping
+     * and live scaling.  Feeding the scaled scroll event into inertia means
+     * its handoff velocity automatically follows the speed slider.
+     */
+    scroll_on_sym {
+        input-processors =
+            <&zip_xy_transform INPUT_TRANSFORM_Y_INVERT>,
+            <&rip_rscr>,
+            <&scroll_inertia_right_sym>;
+    };
 };
 
 &rip_lscr { status = "okay"; };
@@ -57,6 +70,17 @@
 
 &scroll_inertia_right_sym {
     status = "okay";
+
+    /*
+     * Inertia now receives rscroll's already-scaled 1/2 output.
+     * Keep coast output at 1/1; thresholds are converted from the previous
+     * pre-scale defaults (25/50/2 with downstream 1/2 scaling).
+     */
+    scale = <1>;
+    scale-div = <1>;
+    start = <13>;
+    move = <25>;
+    stop = <1>;
 };
 
 &kscan0 {
