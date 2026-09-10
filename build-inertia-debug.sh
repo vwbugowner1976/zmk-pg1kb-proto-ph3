@@ -1,24 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# PG1KB scroll-inertia freeze debug build
-# Actual local layout:
-#   ~/zmk-dev/v0.3/              <- environment root (env.sh, build/, projects/)
-#     ├─ env.sh
-#     ├─ build/
-#     ├─ projects/
-#     │   ├─ zmk-pg1kb-proto-ph3/          <- this repo
-#     │   ├─ zmk-input-processor-scroll-inertia/
-#     │   ├─ zmk-driver-paw3222/
-#     │   ├─ zmk-pmw3610-driver/
-#     │   └─ zmk-feature-non-lipo-battery-management/
-#     └─ zmk/                    <- west topdir (.west/ lives here)
-#         └─ app/
-#
-# Only the modules actually required by PG1KB + the inertia processor are
-# passed to ZMK_EXTRA_MODULES. Unrelated v0.4/newer modules must not be loaded
-# into this ZMK v0.3 build.
-# The generated UF2 is copied to Windows without overwriting an existing file.
+# PG1KB ZMK v0.3 local build with scroll-inertia runtime tuning for My Keeb Studio.
+# No GitHub Actions are used.
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="${PROJECT_DIR:-$SCRIPT_DIR}"
@@ -34,11 +18,17 @@ WEST_TOPDIR="${WEST_TOPDIR:-$ENV_ROOT/zmk}"
 ZMK_APP="${ZMK_APP:-$WEST_TOPDIR/app}"
 BUILD_DIR="${BUILD_DIR:-$ENV_ROOT/build/pg1kb-inertia-debug}"
 WINDOWS_OUT="${WINDOWS_OUT:-/mnt/d/ZMK-Firmware/UF2/PG1KB}"
+
 INERTIA_DIR="${INERTIA_DIR:-$ENV_ROOT/projects/zmk-input-processor-scroll-inertia}"
 PAW3222_DIR="$ENV_ROOT/projects/zmk-driver-paw3222"
 PMW3610_DIR="$ENV_ROOT/projects/zmk-pmw3610-driver"
 NON_LIPO_DIR="$ENV_ROOT/projects/zmk-feature-non-lipo-battery-management"
-EXPECTED_BRANCH="debug/scroll-inertia-freeze"
+CUSTOM_SETTINGS_DIR="$ENV_ROOT/projects/zmk-feature-custom-settings-v03"
+RUNTIME_SETTINGS_DIR="$PROJECT_DIR/runtime-settings"
+RUNTIME_PATCHER="$PROJECT_DIR/tools/patch-scroll-inertia-runtime.py"
+
+EXPECTED_BRANCH="feature/mykeeb-inertia-runtime"
+CUSTOM_SETTINGS_REV="419ffdc727a0bb09cac0298b74345b878473fbbc"
 
 fail() {
     echo "ERROR: $*" >&2
@@ -49,51 +39,55 @@ fail() {
 [[ -d "$WEST_TOPDIR/.west" ]] || fail "west workspace not found: $WEST_TOPDIR"
 [[ -d "$ZMK_APP" ]] || fail "ZMK app not found: $ZMK_APP"
 [[ -f "$PROJECT_DIR/config/west.yml" ]] || fail "PG1KB repo not found: $PROJECT_DIR"
-[[ -d "$INERTIA_DIR" ]] || fail "local scroll-inertia module not found: $INERTIA_DIR"
+[[ -d "$INERTIA_DIR/.git" ]] || fail "local scroll-inertia module not found: $INERTIA_DIR"
 [[ -d "$PAW3222_DIR" ]] || fail "PAW3222 module not found: $PAW3222_DIR"
 [[ -d "$PMW3610_DIR" ]] || fail "PMW3610 module not found: $PMW3610_DIR"
 [[ -d "$NON_LIPO_DIR" ]] || fail "non-LiPo module not found: $NON_LIPO_DIR"
+[[ -d "$CUSTOM_SETTINGS_DIR/.git" ]] || fail "Custom Settings v0.3 module not found: $CUSTOM_SETTINGS_DIR (clone vwbugowner1976/zmk-feature-custom-settings-v03 first)"
+[[ -f "$RUNTIME_SETTINGS_DIR/zephyr/module.yml" ]] || fail "runtime settings module missing: $RUNTIME_SETTINGS_DIR"
+[[ -f "$RUNTIME_PATCHER" ]] || fail "runtime patcher missing: $RUNTIME_PATCHER"
 
 current_branch="$(git -C "$PROJECT_DIR" branch --show-current 2>/dev/null || true)"
 [[ "$current_branch" == "$EXPECTED_BRANCH" ]] || fail "wrong branch: '$current_branch' (expected '$EXPECTED_BRANCH')"
 
+custom_settings_head="$(git -C "$CUSTOM_SETTINGS_DIR" rev-parse HEAD 2>/dev/null || true)"
+[[ "$custom_settings_head" == "$CUSTOM_SETTINGS_REV" ]] || \
+    fail "Custom Settings revision is $custom_settings_head (expected $CUSTOM_SETTINGS_REV)"
+
 # Reuse the existing environment exactly as created before.
-# If the venv is not active, source env.sh automatically.
 if [[ -z "${VIRTUAL_ENV:-}" || ! -x "${VIRTUAL_ENV:-}/bin/west" ]]; then
     # shellcheck disable=SC1090
     source "$ENV_ROOT/env.sh"
 fi
 
 command -v west >/dev/null 2>&1 || fail "west not found after sourcing $ENV_ROOT/env.sh"
+command -v python3 >/dev/null 2>&1 || fail "python3 not found"
 
 cd "$WEST_TOPDIR"
 actual_topdir="$(west topdir 2>/dev/null || true)"
 [[ "$actual_topdir" == "$WEST_TOPDIR" ]] || fail "unexpected west topdir: '$actual_topdir' (expected '$WEST_TOPDIR')"
 
-echo "Environment: $ENV_ROOT"
-echo "West topdir: $WEST_TOPDIR"
-echo "Project    : $PROJECT_DIR"
-echo "Inertia    : $INERTIA_DIR"
-echo "Build dir  : $BUILD_DIR"
-echo "Windows    : $WINDOWS_OUT"
+echo "Environment      : $ENV_ROOT"
+echo "West topdir      : $WEST_TOPDIR"
+echo "PG1KB            : $PROJECT_DIR"
+echo "Inertia          : $INERTIA_DIR"
+echo "Custom Settings  : $CUSTOM_SETTINGS_DIR"
+echo "Runtime adapter  : $RUNTIME_SETTINGS_DIR"
+echo "Build dir        : $BUILD_DIR"
+echo "Windows          : $WINDOWS_OUT"
 echo
 
-if git -C "$INERTIA_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    echo "==> Using local scroll-inertia module"
-    echo "    commit: $(git -C "$INERTIA_DIR" rev-parse --short HEAD)"
-else
-    echo "==> Using local scroll-inertia module (non-git directory)"
-fi
+echo "==> Applying idempotent runtime API patch to pinned scroll-inertia"
+python3 "$RUNTIME_PATCHER" "$INERTIA_DIR"
 
-echo "==> Building PG1KB right / inertia debug"
-EXTRA_MODULES="$INERTIA_DIR;$PAW3222_DIR;$PMW3610_DIR;$NON_LIPO_DIR"
+echo "==> Building PG1KB right / My Keeb inertia runtime"
+EXTRA_MODULES="$INERTIA_DIR;$PAW3222_DIR;$PMW3610_DIR;$NON_LIPO_DIR;$CUSTOM_SETTINGS_DIR;$RUNTIME_SETTINGS_DIR"
 
 west build -p always \
     -d "$BUILD_DIR" \
     -s "$ZMK_APP" \
     -b seeeduino_xiao_ble \
     -S studio-rpc-usb-uart \
-    -S zmk-usb-logging \
     -- \
     -DSHIELD=pg1kb_proto_right \
     -DBOARD_ROOT="$PROJECT_DIR" \
@@ -103,8 +97,13 @@ west build -p always \
 UF2="$BUILD_DIR/zephyr/zmk.uf2"
 [[ -f "$UF2" ]] || fail "UF2 was not generated: $UF2"
 
+# Sanity-check the confirmed freeze fix in the actual generated config.
+if ! grep -q '^CONFIG_INPUT_THREAD_STACK_SIZE=2048$' "$BUILD_DIR/zephyr/.config"; then
+    fail "CONFIG_INPUT_THREAD_STACK_SIZE=2048 is not active in the generated build"
+fi
+
 mkdir -p "$WINDOWS_OUT"
-base="pg1kb_proto_right_inertia_debug"
+base="pg1kb_proto_right_mykeeb_inertia"
 dest="$WINDOWS_OUT/${base}.uf2"
 
 # Never overwrite an existing file. Add timestamp, then a counter if necessary.
