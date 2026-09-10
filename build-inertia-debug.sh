@@ -8,10 +8,16 @@ set -euo pipefail
 #     ├─ build/
 #     ├─ projects/
 #     │   ├─ zmk-pg1kb-proto-ph3/          <- this repo
-#     │   └─ zmk-input-processor-scroll-inertia/
+#     │   ├─ zmk-input-processor-scroll-inertia/
+#     │   ├─ zmk-driver-paw3222/
+#     │   ├─ zmk-pmw3610-driver/
+#     │   └─ zmk-feature-non-lipo-battery-management/
 #     └─ zmk/                    <- west topdir (.west/ lives here)
 #         └─ app/
 #
+# Only the modules actually required by PG1KB + the inertia processor are
+# passed to ZMK_EXTRA_MODULES. Unrelated v0.4/newer modules must not be loaded
+# into this ZMK v0.3 build.
 # The generated UF2 is copied to Windows without overwriting an existing file.
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,6 +35,9 @@ ZMK_APP="${ZMK_APP:-$WEST_TOPDIR/app}"
 BUILD_DIR="${BUILD_DIR:-$ENV_ROOT/build/pg1kb-inertia-debug}"
 WINDOWS_OUT="${WINDOWS_OUT:-/mnt/d/ZMK-Firmware/UF2/PG1KB}"
 INERTIA_DIR="${INERTIA_DIR:-$ENV_ROOT/projects/zmk-input-processor-scroll-inertia}"
+PAW3222_DIR="$ENV_ROOT/projects/zmk-driver-paw3222"
+PMW3610_DIR="$ENV_ROOT/projects/zmk-pmw3610-driver"
+NON_LIPO_DIR="$ENV_ROOT/projects/zmk-feature-non-lipo-battery-management"
 EXPECTED_BRANCH="debug/scroll-inertia-freeze"
 
 fail() {
@@ -41,6 +50,9 @@ fail() {
 [[ -d "$ZMK_APP" ]] || fail "ZMK app not found: $ZMK_APP"
 [[ -f "$PROJECT_DIR/config/west.yml" ]] || fail "PG1KB repo not found: $PROJECT_DIR"
 [[ -d "$INERTIA_DIR" ]] || fail "local scroll-inertia module not found: $INERTIA_DIR"
+[[ -d "$PAW3222_DIR" ]] || fail "PAW3222 module not found: $PAW3222_DIR"
+[[ -d "$PMW3610_DIR" ]] || fail "PMW3610 module not found: $PMW3610_DIR"
+[[ -d "$NON_LIPO_DIR" ]] || fail "non-LiPo module not found: $NON_LIPO_DIR"
 
 current_branch="$(git -C "$PROJECT_DIR" branch --show-current 2>/dev/null || true)"
 [[ "$current_branch" == "$EXPECTED_BRANCH" ]] || fail "wrong branch: '$current_branch' (expected '$EXPECTED_BRANCH')"
@@ -66,8 +78,6 @@ echo "Build dir  : $BUILD_DIR"
 echo "Windows    : $WINDOWS_OUT"
 echo
 
-# This workspace keeps custom modules in ENV_ROOT/projects and they are not
-# necessarily registered as west projects. Use the existing local checkout.
 if git -C "$INERTIA_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo "==> Using local scroll-inertia module"
     echo "    commit: $(git -C "$INERTIA_DIR" rev-parse --short HEAD)"
@@ -76,6 +86,8 @@ else
 fi
 
 echo "==> Building PG1KB right / inertia debug"
+EXTRA_MODULES="$INERTIA_DIR;$PAW3222_DIR;$PMW3610_DIR;$NON_LIPO_DIR"
+
 west build -p always \
     -d "$BUILD_DIR" \
     -s "$ZMK_APP" \
@@ -85,7 +97,7 @@ west build -p always \
     -- \
     -DSHIELD=pg1kb_proto_right \
     -DBOARD_ROOT="$PROJECT_DIR" \
-    -DZMK_EXTRA_MODULES="$INERTIA_DIR;$ENV_ROOT/projects/zmk-driver-paw3222;$ENV_ROOT/projects/zmk-pmw3610-driver;$ENV_ROOT/projects/zmk-feature-non-lipo-battery-management;$ENV_ROOT/projects/zmk-feature-custom-settings;$ENV_ROOT/projects/zmk-module-runtime-input-processor;$ENV_ROOT/projects/prospector-zmk-module" \
+    -DZMK_EXTRA_MODULES="$EXTRA_MODULES" \
     -DCONFIG_ZMK_STUDIO=y
 
 UF2="$BUILD_DIR/zephyr/zmk.uf2"
