@@ -3,17 +3,26 @@ set -euo pipefail
 
 # PG1KB scroll-inertia freeze debug build
 # Expected layout:
-#   /mnt/d/ZMK-Firmware/zmk-dev/v0.3/
+#   ~/zmk-dev/v0.3/
 #     ├─ .west/
 #     ├─ zmk/app/
-#     └─ pg1kb-proto/   <- this repo
+#     └─ projects/
+#         └─ pg1kb-proto/   <- this repo
 #
-# The workspace is auto-detected from this repo's parent directory.
-# The generated UF2 is copied back to Windows without overwriting an existing file.
+# The workspace is auto-detected from this repo's projects/ parent.
+# The generated UF2 is copied to Windows without overwriting an existing file.
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="${PROJECT_DIR:-$SCRIPT_DIR}"
-ZMK_DEV="${ZMK_DEV:-$(cd -- "$PROJECT_DIR/.." && pwd)}"
+PROJECTS_DIR="$(cd -- "$PROJECT_DIR/.." && pwd)"
+
+if [[ "$(basename "$PROJECTS_DIR")" == "projects" ]]; then
+    DEFAULT_ZMK_DEV="$(cd -- "$PROJECTS_DIR/.." && pwd)"
+else
+    DEFAULT_ZMK_DEV="$(cd -- "$PROJECT_DIR/.." && pwd)"
+fi
+
+ZMK_DEV="${ZMK_DEV:-$DEFAULT_ZMK_DEV}"
 ZMK_APP="${ZMK_APP:-$ZMK_DEV/zmk/app}"
 BUILD_DIR="${BUILD_DIR:-$ZMK_DEV/build/pg1kb-inertia-debug}"
 WINDOWS_OUT="${WINDOWS_OUT:-/mnt/d/ZMK-Firmware/UF2/PG1KB}"
@@ -35,8 +44,8 @@ current_branch="$(git -C "$PROJECT_DIR" branch --show-current 2>/dev/null || tru
 for venv in \
     "$ZMK_DEV/.venv/bin/activate" \
     "$ZMK_DEV/venv/bin/activate" \
-    "$ZMK_DEV/../.venv/bin/activate" \
-    "$ZMK_DEV/../venv/bin/activate"
+    "$HOME/zmk-dev/.venv/bin/activate" \
+    "$HOME/zmk-dev/venv/bin/activate"
 do
     if [[ -f "$venv" ]]; then
         # shellcheck disable=SC1090
