@@ -47,23 +47,31 @@
 &rip_rpre { status = "okay"; };
 &rip_rscr { status = "okay"; };
 
+/*
+ * Inertia is downstream of the runtime input processor, so it receives values
+ * after My Keeb Studio's live scale has already been applied. Keep inertia at
+ * 1/1 and express thresholds in that post-scale domain.
+ */
 &scroll_inertia_left_base {
     status = "okay";
+    scale = <1>;
+    scale-div = <1>;
+    start = <13>;
+    move = <25>;
+    stop = <1>;
 };
 
 &scroll_inertia_left_sym {
     status = "okay";
+    scale = <1>;
+    scale-div = <1>;
+    start = <4>;
+    move = <8>;
+    stop = <1>;
 };
 
 &scroll_inertia_right_sym {
     status = "okay";
-
-    /*
-     * Right/Sym keymap chain is: transform -> rscroll -> inertia.
-     * rscroll already scales the direct scroll, so inertia receives scaled
-     * velocity and emits at 1/1. Thresholds are the old pre-scale 1/2 values
-     * converted to the post-scale domain.
-     */
     scale = <1>;
     scale-div = <1>;
     start = <13>;
