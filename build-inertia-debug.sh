@@ -7,7 +7,8 @@ set -euo pipefail
 #     ├─ env.sh
 #     ├─ build/
 #     ├─ projects/
-#     │   └─ zmk-pg1kb-proto-ph3/   <- this repo
+#     │   ├─ zmk-pg1kb-proto-ph3/          <- this repo
+#     │   └─ zmk-input-processor-scroll-inertia/
 #     └─ zmk/                    <- west topdir (.west/ lives here)
 #         └─ app/
 #
@@ -27,6 +28,7 @@ WEST_TOPDIR="${WEST_TOPDIR:-$ENV_ROOT/zmk}"
 ZMK_APP="${ZMK_APP:-$WEST_TOPDIR/app}"
 BUILD_DIR="${BUILD_DIR:-$ENV_ROOT/build/pg1kb-inertia-debug}"
 WINDOWS_OUT="${WINDOWS_OUT:-/mnt/d/ZMK-Firmware/UF2/PG1KB}"
+INERTIA_DIR="${INERTIA_DIR:-$ENV_ROOT/projects/zmk-input-processor-scroll-inertia}"
 EXPECTED_BRANCH="debug/scroll-inertia-freeze"
 
 fail() {
@@ -38,6 +40,7 @@ fail() {
 [[ -d "$WEST_TOPDIR/.west" ]] || fail "west workspace not found: $WEST_TOPDIR"
 [[ -d "$ZMK_APP" ]] || fail "ZMK app not found: $ZMK_APP"
 [[ -f "$PROJECT_DIR/config/west.yml" ]] || fail "PG1KB repo not found: $PROJECT_DIR"
+[[ -d "$INERTIA_DIR" ]] || fail "local scroll-inertia module not found: $INERTIA_DIR"
 
 current_branch="$(git -C "$PROJECT_DIR" branch --show-current 2>/dev/null || true)"
 [[ "$current_branch" == "$EXPECTED_BRANCH" ]] || fail "wrong branch: '$current_branch' (expected '$EXPECTED_BRANCH')"
@@ -51,8 +54,6 @@ fi
 
 command -v west >/dev/null 2>&1 || fail "west not found after sourcing $ENV_ROOT/env.sh"
 
-# This project lives beside the west workspace under projects/, so west topdir
-# must be queried from inside the actual west workspace, not from PROJECT_DIR.
 cd "$WEST_TOPDIR"
 actual_topdir="$(west topdir 2>/dev/null || true)"
 [[ "$actual_topdir" == "$WEST_TOPDIR" ]] || fail "unexpected west topdir: '$actual_topdir' (expected '$WEST_TOPDIR')"
@@ -60,12 +61,19 @@ actual_topdir="$(west topdir 2>/dev/null || true)"
 echo "Environment: $ENV_ROOT"
 echo "West topdir: $WEST_TOPDIR"
 echo "Project    : $PROJECT_DIR"
+echo "Inertia    : $INERTIA_DIR"
 echo "Build dir  : $BUILD_DIR"
 echo "Windows    : $WINDOWS_OUT"
 echo
 
-echo "==> Updating pinned scroll-inertia module"
-west update zmk-input-processor-scroll-inertia
+# This workspace keeps custom modules in ENV_ROOT/projects and they are not
+# necessarily registered as west projects. Use the existing local checkout.
+if git -C "$INERTIA_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "==> Using local scroll-inertia module"
+    echo "    commit: $(git -C "$INERTIA_DIR" rev-parse --short HEAD)"
+else
+    echo "==> Using local scroll-inertia module (non-git directory)"
+fi
 
 echo "==> Building PG1KB right / inertia debug"
 west build -p always \
@@ -77,6 +85,7 @@ west build -p always \
     -- \
     -DSHIELD=pg1kb_proto_right \
     -DBOARD_ROOT="$PROJECT_DIR" \
+    -DZMK_EXTRA_MODULES="$INERTIA_DIR;$ENV_ROOT/projects/zmk-driver-paw3222;$ENV_ROOT/projects/zmk-pmw3610-driver;$ENV_ROOT/projects/zmk-feature-non-lipo-battery-management;$ENV_ROOT/projects/zmk-feature-custom-settings;$ENV_ROOT/projects/zmk-module-runtime-input-processor;$ENV_ROOT/projects/prospector-zmk-module" \
     -DCONFIG_ZMK_STUDIO=y
 
 UF2="$BUILD_DIR/zephyr/zmk.uf2"
