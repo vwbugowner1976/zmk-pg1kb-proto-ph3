@@ -2,6 +2,8 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
+    - name: cormoran
+      url-base: https://github.com/cormoran
     - name: sekigon-gonnoc
       url-base: https://github.com/sekigon-gonnoc
     - name: badjeff
@@ -15,9 +17,11 @@ manifest:
     - name: vwbugowner1976
       url-base: https://github.com/vwbugowner1976
   projects:
+    # Exact official v0.3.0 base + cormoran Custom Studio RPC backport.
+    # Upstream v0.3.0 commit: edf5c0814fd3ea202e43aad2d68fd32e882a518c
     - name: zmk
-      remote: zmkfirmware
-      revision: v0.3.0
+      remote: cormoran
+      revision: 35bb5dafecd5931c432c74e1b630cf12097671e4
       import: app/west.yml
     - name: zmk-driver-paw3222
       remote: vwbugowner1976
