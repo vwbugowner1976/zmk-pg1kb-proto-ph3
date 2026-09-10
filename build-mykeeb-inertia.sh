@@ -7,9 +7,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="${PROJECT_DIR:-$SCRIPT_DIR}"
 ENV_ROOT="${ENV_ROOT:-$HOME/zmk-dev/v0.3}"
-WEST_TOPDIR="${WEST_TOPDIR:-$ENV_ROOT/zmk}"
-ZMK_APP="${ZMK_APP:-$WEST_TOPDIR/app}"
-BUILD_DIR="${BUILD_DIR:-$ENV_ROOT/build/pg1kb-mykeeb-inertia}"
+PG1KB_V03_ROOT="${PG1KB_V03_ROOT:-$HOME/zmk-dev/pg1kb-v03}"
+WEST_TOPDIR="${WEST_TOPDIR:-$PG1KB_V03_ROOT}"
+ZMK_APP="${ZMK_APP:-$PG1KB_V03_ROOT/zmk/app}"
+BUILD_DIR="${BUILD_DIR:-$PG1KB_V03_ROOT/build/pg1kb-mykeeb-inertia}"
 WINDOWS_OUT="${WINDOWS_OUT:-/mnt/d/ZMK-Firmware/UF2/PG1KB}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
@@ -24,7 +25,7 @@ module_path() {
         fi
     done
     if command -v west >/dev/null 2>&1; then
-        candidate="$(west list "$name" -f '{abspath}' 2>/dev/null || true)"
+        candidate="$(cd "$WEST_TOPDIR" && west list "$name" -f '{abspath}' 2>/dev/null || true)"
         if [[ -n "$candidate" && -e "$candidate" ]]; then
             printf '%s\n' "$candidate"
             return 0
@@ -37,12 +38,16 @@ module_path() {
 # shellcheck disable=SC1090
 source "$ENV_ROOT/env.sh"
 command -v west >/dev/null 2>&1 || fail "west not found after sourcing env.sh"
-[[ -d "$WEST_TOPDIR/.west" ]] || fail "west workspace not found: $WEST_TOPDIR"
+[[ -d "$WEST_TOPDIR/.west" ]] || fail "PG1KB v0.3 west workspace not found: $WEST_TOPDIR"
 [[ -d "$ZMK_APP" ]] || fail "ZMK app not found: $ZMK_APP"
 
 # This feature uses cormoran's ZMK v0.3 custom-Studio backport.
 [[ -f "$ZMK_APP/include/zmk/studio/custom.h" ]] || fail \
-  "Current ZMK does not contain custom Studio RPC (app/include/zmk/studio/custom.h missing). Use the PG1KB v0.3 custom-Studio workspace."
+  "Current ZMK does not contain custom Studio RPC (app/include/zmk/studio/custom.h missing). Expected PG1KB v0.3 custom-Studio workspace at $PG1KB_V03_ROOT"
+
+# The matching custom Studio message set must be in the same west workspace.
+[[ -f "$WEST_TOPDIR/modules/msgs/zmk-studio-messages/proto/zmk/custom.proto" ]] || fail \
+  "zmk-studio-messages custom.proto missing from PG1KB v0.3 workspace"
 
 INERTIA_DIR="$(module_path zmk-input-processor-scroll-inertia \
     "$ENV_ROOT/projects/zmk-input-processor-scroll-inertia")" || fail "scroll-inertia module not found"
