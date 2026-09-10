@@ -180,6 +180,7 @@
     input-processors =
         <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
         <&zip_xy_to_scroll_mapper>,
+        <&scroll_inertia_left_base>,
         <&zip_scroll_scaler 1 2>;
 
     move_on_num {
@@ -194,6 +195,7 @@
         input-processors =
             <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
             <&zip_xy_to_scroll_mapper>,
+            <&scroll_inertia_left_sym>,
             <&zip_scroll_scaler 1 6>;
     };
 };
@@ -211,7 +213,6 @@
             <&zip_xy_scaler 1 2>;
     };
 
-    /* freeze 調査: inertia はまず右手 Sym の1インスタンスだけで再現させる */
     scroll_on_sym {
         layers = <2>;
         input-processors =
