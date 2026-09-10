@@ -40,16 +40,25 @@
     status = "okay";
 };
 
+/*
+ * scroll-inertia freeze 調査用。
+ * 左側2インスタンスは完全に無効化し、右手 Sym の1インスタンスだけを動かす。
+ * 最初の切り分けでは Y 軸のみ / 32 ms tick / 最大1秒に制限して、
+ * AXIS_BOTH・複数インスタンス・高頻度HID送信を同時に除外する。
+ */
 &scroll_inertia_left_base {
-    status = "okay";
+    status = "disabled";
 };
 
 &scroll_inertia_left_sym {
-    status = "okay";
+    status = "disabled";
 };
 
 &scroll_inertia_right_sym {
     status = "okay";
+    axis = <1>;
+    tick = <32>;
+    span = <1000>;
 };
 
 &kscan0 {
