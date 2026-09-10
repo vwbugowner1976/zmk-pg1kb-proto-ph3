@@ -211,11 +211,13 @@
             <&zip_xy_scaler 1 2>;
     };
 
+    /* freeze 調査: inertia はまず右手 Sym の1インスタンスだけで再現させる */
     scroll_on_sym {
         layers = <2>;
         input-processors =
             <&zip_xy_transform INPUT_TRANSFORM_Y_INVERT>,
             <&zip_xy_to_scroll_mapper>,
+            <&scroll_inertia_right_sym>,
             <&zip_scroll_scaler 1 2>;
     };
 };
