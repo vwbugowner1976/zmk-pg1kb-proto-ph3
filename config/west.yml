@@ -36,9 +36,12 @@ manifest:
     - name: zmk-input-processor-scroll-inertia
       remote: mjmjm0101
       revision: f7dadefee453d555fe066d13a3de3bb60739b45e
-    - name: zmk-feature-custom-settings
-      remote: cormoran
-      revision: c6a7fef3a3be3d3ace5de9a4b0628c6418cd1f3f
+    # Zephyr 3.5 / ZMK v0.3 compatible fork.  Modern custom-settings uses
+    # `configdefault`, which this Zephyr generation cannot parse.
+    - name: zmk-feature-custom-settings-v03
+      remote: vwbugowner1976
+      revision: 419ffdc727a0bb09cac0298b74345b878473fbbc
+      path: modules/zmk-feature-custom-settings
     - name: zmk-module-runtime-input-processor
       remote: cormoran
       revision: 43618985f8c9d5457cc333b7ca0733f2d361911e
