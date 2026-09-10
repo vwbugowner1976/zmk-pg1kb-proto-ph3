@@ -51,10 +51,11 @@ fi
 
 command -v west >/dev/null 2>&1 || fail "west not found after sourcing $ENV_ROOT/env.sh"
 
+# This project lives beside the west workspace under projects/, so west topdir
+# must be queried from inside the actual west workspace, not from PROJECT_DIR.
+cd "$WEST_TOPDIR"
 actual_topdir="$(west topdir 2>/dev/null || true)"
 [[ "$actual_topdir" == "$WEST_TOPDIR" ]] || fail "unexpected west topdir: '$actual_topdir' (expected '$WEST_TOPDIR')"
-
-cd "$WEST_TOPDIR"
 
 echo "Environment: $ENV_ROOT"
 echo "West topdir: $WEST_TOPDIR"
