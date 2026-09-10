@@ -1,0 +1,12 @@
+menu "PG1KB runtime features"
+
+config PG1KB_INERTIA_RUNTIME_SETTINGS
+    bool "PG1KB scroll inertia runtime settings"
+    depends on ZMK_CUSTOM_SETTINGS
+    depends on ZMK_INPUT_PROCESSOR_SCROLL_INERTIA
+    default n
+    help
+      Expose PG1KB scroll inertia parameters through cormoran custom settings.
+      The settings are applied to the scroll-inertia processor at runtime.
+
+endmenu
