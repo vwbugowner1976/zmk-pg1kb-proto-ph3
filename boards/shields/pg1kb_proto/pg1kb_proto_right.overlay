@@ -22,6 +22,38 @@
         compatible = "zmk,non-lipo-battery";
         io-channels = <&adc 3>;
     };
+
+    /*
+     * Side-wide runtime rotation processors.  They run before the existing
+     * per-mode orientation transform, so one angle applies consistently to all
+     * Base/Num/Sym modes on that physical trackball.  0 degrees preserves the
+     * currently tested behavior.
+     */
+    rip_lrot: rip_lrot {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "lrot";
+        status = "okay";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <1>;
+        rotation-degrees = <0>;
+        #input-processor-cells = <0>;
+    };
+
+    rip_rrot: rip_rrot {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "rrot";
+        status = "okay";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <1>;
+        rotation-degrees = <0>;
+        #input-processor-cells = <0>;
+    };
 };
 
 &default_transform {
