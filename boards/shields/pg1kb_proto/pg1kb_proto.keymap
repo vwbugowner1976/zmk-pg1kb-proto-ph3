@@ -145,15 +145,18 @@
  *
  *            左ボール                   右ボール
  *   Base     スクロール     1/2          カーソル      3/2
- *   Num      カーソル       3/2          精密カーソル  1/2         ← 両手でポインタ操作
- *   Sym      精密スクロール 1/6          スクロール    1/2         ← 両手でスクロール操作
+ *   Num      カーソル       3/2          精密カーソル  1/2
+ *   Sym      精密スクロール 1/6          スクロール    1/2
  *
- * 速度倍率と XY→scroll 変換は runtime input processor が担当する。
- * My Keeb Studio から lscroll/lmove/lprec/rmove/rprec/rscroll を個別調整できる。
- * スクロール慣性は runtime input processor の後段に置き、現在のスケール済み値を受ける。
+ * lrot / rrot は左右それぞれの共通任意角度補正。My Keeb Studioから変更する。
+ * 0° は現在の実機確認済み挙動をそのまま保つ相対補正値。
+ * その後段で既存の固定向き補正を行い、速度倍率とXY→scroll変換を
+ * lscroll/lmove/lprec/rmove/rprec/rscroll が担当する。
+ * スクロール慣性は runtime input processor の後段に置く。
  */
 &left_trackball_listener {
     input-processors =
+        <&rip_lrot>,
         <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
         <&rip_lscr>,
         <&scroll_inertia_left_base>;
@@ -161,6 +164,7 @@
     move_on_num {
         layers = <1>;
         input-processors =
+            <&rip_lrot>,
             <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_Y_INVERT)>,
             <&rip_lmov>;
     };
@@ -168,6 +172,7 @@
     precise_scroll_on_sym {
         layers = <2>;
         input-processors =
+            <&rip_lrot>,
             <&zip_xy_transform INPUT_TRANSFORM_XY_SWAP>,
             <&rip_lpre>,
             <&scroll_inertia_left_sym>;
@@ -175,14 +180,15 @@
 };
 
 &right_trackball_listener {
-    /* デフォルト（カーソル）はセンサーの軸がそのまま使えるので変換なし */
     input-processors =
+        <&rip_rrot>,
         <&zip_xy_transform 0>,
         <&rip_rmov>;
 
     precise_move_on_num {
         layers = <1>;
         input-processors =
+            <&rip_rrot>,
             <&zip_xy_transform 0>,
             <&rip_rpre>;
     };
@@ -190,6 +196,7 @@
     scroll_on_sym {
         layers = <2>;
         input-processors =
+            <&rip_rrot>,
             <&zip_xy_transform INPUT_TRANSFORM_Y_INVERT>,
             <&rip_rscr>,
             <&scroll_inertia_right_sym>;
