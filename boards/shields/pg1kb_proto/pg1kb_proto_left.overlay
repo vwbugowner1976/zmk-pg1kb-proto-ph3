@@ -22,6 +22,36 @@
         compatible = "zmk,non-lipo-battery";
         io-channels = <&adc 3>;
     };
+
+    /*
+     * Labels are present on the shared left keymap as well, but runtime rotation
+     * is executed only on the right/central after split input arrives.
+     */
+    rip_lrot: rip_lrot {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "lrot";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <1>;
+        rotation-degrees = <0>;
+        #input-processor-cells = <0>;
+    };
+
+    rip_rrot: rip_rrot {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "rrot";
+        status = "disabled";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <1>;
+        rotation-degrees = <0>;
+        #input-processor-cells = <0>;
+    };
 };
 
 &vbatt {
