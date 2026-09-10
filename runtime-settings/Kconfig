@@ -1,0 +1,8 @@
+config PG1KB_INERTIA_RUNTIME_SETTINGS
+    bool "PG1KB scroll inertia runtime settings"
+    default y
+    depends on ZMK_CUSTOM_SETTINGS
+    depends on ZMK_INPUT_PROCESSOR_SCROLL_INERTIA
+    help
+      Expose the right-hand Sym scroll-inertia enable/start/move/stop
+      parameters through Custom Settings for live tuning in My Keeb Studio.
