@@ -35,7 +35,7 @@ manifest:
       revision: fix/do-not-force-zmk-sleep
     - name: zmk-input-processor-scroll-inertia
       remote: mjmjm0101
-      revision: main
+      revision: f7dadefee453d555fe066d13a3de3bb60739b45e
     - name: zmk-feature-custom-settings
       remote: cormoran
       revision: main
