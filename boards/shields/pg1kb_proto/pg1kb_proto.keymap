@@ -217,6 +217,7 @@
         layers = <2>;
         input-processors =
             <&zip_xy_transform INPUT_TRANSFORM_Y_INVERT>,
-            <&rip_rscr>;
+            <&rip_rscr>,
+            <&scroll_inertia_right_sym>;
     };
 };
