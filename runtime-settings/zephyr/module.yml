@@ -1,0 +1,7 @@
+name: pg1kb-inertia-runtime-settings
+build:
+  depends:
+    - zmk-input-processor-scroll-inertia
+    - zmk-feature-custom-settings
+  cmake: .
+  kconfig: Kconfig
