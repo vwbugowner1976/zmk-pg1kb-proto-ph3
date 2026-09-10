@@ -40,11 +40,9 @@ command -v west >/dev/null 2>&1 || fail "west not found after sourcing env.sh"
 [[ -d "$WEST_TOPDIR/.west" ]] || fail "west workspace not found: $WEST_TOPDIR"
 [[ -d "$ZMK_APP" ]] || fail "ZMK app not found: $ZMK_APP"
 
-# This feature uses cormoran's ZMK v0.3 custom-Studio backport.  Keep the
-# ordinary official-v0.3 checkout untouched and point ZMK_APP at the alternate
-# checkout when invoking this script.
+# This feature uses cormoran's ZMK v0.3 custom-Studio backport.
 [[ -f "$ZMK_APP/include/zmk/studio/custom.h" ]] || fail \
-  "Current ZMK does not contain custom Studio RPC (app/include/zmk/studio/custom.h missing). Use ZMK_APP=~/zmk-dev/v0.3/projects/zmk-cormoran-v03-custom/app"
+  "Current ZMK does not contain custom Studio RPC (app/include/zmk/studio/custom.h missing). Use the PG1KB v0.3 custom-Studio workspace."
 
 INERTIA_DIR="$(module_path zmk-input-processor-scroll-inertia \
     "$ENV_ROOT/projects/zmk-input-processor-scroll-inertia")" || fail "scroll-inertia module not found"
@@ -56,7 +54,7 @@ NON_LIPO_DIR="$(module_path zmk-feature-non-lipo-battery-management \
     "$ENV_ROOT/projects/zmk-feature-non-lipo-battery-management")" || fail "non-LiPo module not found"
 
 # IMPORTANT: Zephyr 3.5 cannot parse modern custom-settings' `configdefault`
-# Kconfig syntax.  Always prefer/use the dedicated v03 fork here.
+# Kconfig syntax. Always use the dedicated v03 fork here.
 CUSTOM_SETTINGS_DIR="$(module_path zmk-feature-custom-settings-v03 \
     "$ENV_ROOT/projects/zmk-feature-custom-settings-v03" \
     "$WEST_TOPDIR/modules/zmk-feature-custom-settings")" || fail \
@@ -87,15 +85,19 @@ if grep -q '^configdefault ' "$CUSTOM_SETTINGS_DIR/Kconfig"; then
     fail "wrong Custom Settings checkout selected: Zephyr 3.5 cannot parse configdefault"
 fi
 
-# Backport only the one-shot settings-loaded event needed by the already-used
-# runtime-input-processor persistence path, then add the scroll-inertia runtime
-# API.  Both patchers are idempotent.
+# Backport only the small compatibility pieces required by the v0.3 stack.
+# All patchers are idempotent.
 python3 "$PROJECT_DIR/tools/patch-custom-settings-v03.py" "$CUSTOM_SETTINGS_DIR"
+python3 "$PROJECT_DIR/tools/patch-runtime-input-v03.py" "$RUNTIME_INPUT_DIR"
 python3 "$PROJECT_DIR/tools/patch-scroll-inertia-runtime.py" "$INERTIA_DIR"
 
 grep -q 'ZMK_EVENT_DECLARE(zmk_custom_settings_initialized)' \
     "$CUSTOM_SETTINGS_DIR/include/cormoran/zmk/custom_settings.h" || fail \
     "Custom Settings initialized-event backport was not applied"
+
+grep -q 'zmk_keymap_layer_activate(data->temp_layer_layer)' \
+    "$RUNTIME_INPUT_DIR/src/pointing/input_processor_runtime.c" || fail \
+    "runtime-input-processor v0.3 layer API patch was not applied"
 
 EXTRA_MODULES="$PROJECT_DIR;$INERTIA_DIR;$PAW3222_DIR;$PMW3610_DIR;$NON_LIPO_DIR;$CUSTOM_SETTINGS_DIR;$RUNTIME_INPUT_DIR;$PROSPECTOR_DIR"
 
