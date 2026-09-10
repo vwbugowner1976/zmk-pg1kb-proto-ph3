@@ -26,8 +26,11 @@ NON_LIPO_DIR="$ENV_ROOT/projects/zmk-feature-non-lipo-battery-management"
 CUSTOM_SETTINGS_DIR="$ENV_ROOT/projects/zmk-feature-custom-settings-v03"
 RUNTIME_SETTINGS_DIR="$PROJECT_DIR/runtime-settings"
 RUNTIME_PATCHER="$PROJECT_DIR/tools/patch-scroll-inertia-runtime.py"
+STUDIO_MSGS_DIR="$WEST_TOPDIR/modules/msgs/zmk-studio-messages"
 
 EXPECTED_BRANCH="feature/mykeeb-inertia-runtime"
+ZMK_CUSTOM_STUDIO_REV="35bb5dafecd5931c432c74e1b630cf12097671e4"
+STUDIO_MSGS_REV="89b81d2e587fce807b668dff2a6967a40beef421"
 CUSTOM_SETTINGS_REV="419ffdc727a0bb09cac0298b74345b878473fbbc"
 
 fail() {
@@ -37,6 +40,7 @@ fail() {
 
 [[ -f "$ENV_ROOT/env.sh" ]] || fail "env.sh not found: $ENV_ROOT/env.sh"
 [[ -d "$WEST_TOPDIR/.west" ]] || fail "west workspace not found: $WEST_TOPDIR"
+[[ -d "$WEST_TOPDIR/.git" ]] || fail "ZMK git checkout not found: $WEST_TOPDIR"
 [[ -d "$ZMK_APP" ]] || fail "ZMK app not found: $ZMK_APP"
 [[ -f "$PROJECT_DIR/config/west.yml" ]] || fail "PG1KB repo not found: $PROJECT_DIR"
 [[ -d "$INERTIA_DIR/.git" ]] || fail "local scroll-inertia module not found: $INERTIA_DIR"
@@ -44,11 +48,20 @@ fail() {
 [[ -d "$PMW3610_DIR" ]] || fail "PMW3610 module not found: $PMW3610_DIR"
 [[ -d "$NON_LIPO_DIR" ]] || fail "non-LiPo module not found: $NON_LIPO_DIR"
 [[ -d "$CUSTOM_SETTINGS_DIR/.git" ]] || fail "Custom Settings v0.3 module not found: $CUSTOM_SETTINGS_DIR (clone vwbugowner1976/zmk-feature-custom-settings-v03 first)"
+[[ -d "$STUDIO_MSGS_DIR/.git" ]] || fail "zmk-studio-messages checkout not found: $STUDIO_MSGS_DIR"
 [[ -f "$RUNTIME_SETTINGS_DIR/zephyr/module.yml" ]] || fail "runtime settings module missing: $RUNTIME_SETTINGS_DIR"
 [[ -f "$RUNTIME_PATCHER" ]] || fail "runtime patcher missing: $RUNTIME_PATCHER"
 
 current_branch="$(git -C "$PROJECT_DIR" branch --show-current 2>/dev/null || true)"
 [[ "$current_branch" == "$EXPECTED_BRANCH" ]] || fail "wrong branch: '$current_branch' (expected '$EXPECTED_BRANCH')"
+
+zmk_head="$(git -C "$WEST_TOPDIR" rev-parse HEAD 2>/dev/null || true)"
+[[ "$zmk_head" == "$ZMK_CUSTOM_STUDIO_REV" ]] || \
+    fail "ZMK revision is $zmk_head (expected cormoran v0.3 Custom Studio $ZMK_CUSTOM_STUDIO_REV)"
+
+studio_msgs_head="$(git -C "$STUDIO_MSGS_DIR" rev-parse HEAD 2>/dev/null || true)"
+[[ "$studio_msgs_head" == "$STUDIO_MSGS_REV" ]] || \
+    fail "zmk-studio-messages revision is $studio_msgs_head (expected $STUDIO_MSGS_REV)"
 
 custom_settings_head="$(git -C "$CUSTOM_SETTINGS_DIR" rev-parse HEAD 2>/dev/null || true)"
 [[ "$custom_settings_head" == "$CUSTOM_SETTINGS_REV" ]] || \
@@ -69,6 +82,8 @@ actual_topdir="$(west topdir 2>/dev/null || true)"
 
 echo "Environment      : $ENV_ROOT"
 echo "West topdir      : $WEST_TOPDIR"
+echo "ZMK custom RPC   : $zmk_head"
+echo "Studio messages  : $studio_msgs_head"
 echo "PG1KB            : $PROJECT_DIR"
 echo "Inertia          : $INERTIA_DIR"
 echo "Custom Settings  : $CUSTOM_SETTINGS_DIR"
