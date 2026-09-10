@@ -1,11 +1,14 @@
 name: zmk-keyboard-pg1kb-proto
 build:
+  cmake: .
+  kconfig: Kconfig
   depends:
     - zmk-driver-paw3222
     - zmk-pmw3610-driver
     - zmk-feature-non-lipo-battery-management
     - zmk-feature-custom-settings
     - zmk-module-runtime-input-processor
+    - zmk-input-processor-scroll-inertia
     - prospector-zmk-module
   settings:
     board_root: .
