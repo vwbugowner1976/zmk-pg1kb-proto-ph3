@@ -9,4 +9,13 @@ config PG1KB_INERTIA_RUNTIME_SETTINGS
       Expose PG1KB scroll inertia parameters through cormoran custom settings.
       The settings are applied to the scroll-inertia processor at runtime.
 
+config PG1KB_BLE_MANAGEMENT_STUDIO_RPC
+    bool "PG1KB BLE management Studio RPC"
+    depends on ZMK_STUDIO_RPC
+    depends on ZMK_BLE
+    default n
+    help
+      Expose BLE profile status and profile management commands through a
+      secured MyKeebStudio custom Studio RPC subsystem.
+
 endmenu
