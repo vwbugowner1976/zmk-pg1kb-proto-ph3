@@ -59,6 +59,6 @@ manifest:
       path: modules/prospector-zmk-module
     - name: zmk-behavior-jpkeysforuslayout
       remote: vwbugowner1976
-      revision: cb13b320bb6351ebec52ac035613330eedaf460c
+      revision: d171f1acf07fa107080b48cfd101fa60a182b017
   self:
     path: zmk-pg1kb-proto-ph3
