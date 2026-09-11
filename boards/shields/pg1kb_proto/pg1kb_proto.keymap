@@ -14,65 +14,81 @@
         };
     };
 
-    combos {
-        compatible = "zmk,combos";
+    /*
+     * PG1KBの既存コンボをRuntime Comboのcompile-time defaultsへ移行。
+     * MyKeebStudioから上書き・削除でき、Reset to Defaultでここへ戻せる。
+     * layersは従来のzmk,combosと同じく最上位active layerと比較される。
+     */
+    runtime_combo_defaults {
+        compatible = "cormoran,runtime-combo-defaults";
 
-        /*
-         * layers はコンボ発火時の「最上位のアクティブレイヤー」と比較される。
-         * <0> は他のレイヤーを保持していない状態、つまり Base のみを意味する。
-         */
-        combo-bs {
+        combo_bs_right {
+            slot = <0>;
+            display-name = "Backspace Right";
             bindings = <&kp BACKSPACE>;
             key-positions = <27 28>;
             layers = <0>;
         };
 
-        combo-del {
+        combo_del_right {
+            slot = <1>;
+            display-name = "Delete Right";
             bindings = <&kp DELETE>;
             key-positions = <28 29>;
             layers = <0>;
         };
 
-        combo-enter {
+        combo_enter_right {
+            slot = <2>;
+            display-name = "Enter Right";
             bindings = <&kp ENTER>;
             key-positions = <27 28 29>;
             layers = <0>;
         };
 
-        combo-bs-left {
+        combo_bs_left {
+            slot = <3>;
+            display-name = "Backspace Left";
             bindings = <&kp BACKSPACE>;
             key-positions = <22 23>;
             layers = <0>;
         };
 
-        combo-del-left {
+        combo_del_left {
+            slot = <4>;
+            display-name = "Delete Left";
             bindings = <&kp DELETE>;
             key-positions = <23 24>;
             layers = <0>;
         };
 
-        combo-enter-left {
+        combo_enter_left {
+            slot = <5>;
+            display-name = "Enter Left";
             bindings = <&kp ENTER>;
             key-positions = <22 23 24>;
             layers = <0>;
         };
 
-        /* Num レイヤーのコピー + ペースト同時押しでカット */
-        combo-cut {
+        combo_cut {
+            slot = <6>;
+            display-name = "Cut";
             bindings = <&kp LC(X)>;
             key-positions = <4 5>;
             layers = <1>;
         };
 
-        /* 左クリック + 右クリック同時押しでミドルクリック */
-        combo-mclk {
+        combo_middle_click {
+            slot = <7>;
+            display-name = "Middle Click";
             bindings = <&mkp MCLK>;
             key-positions = <2 3>;
             layers = <0>;
         };
 
-        /* 左手最下段の LEFT_ALT + LEFT_GUI 同時押しで Sys レイヤー（押している間だけ） */
-        combo-sys {
+        combo_sys {
+            slot = <8>;
+            display-name = "Sys Layer";
             bindings = <&mo 3>;
             key-positions = <44 45>;
             layers = <0>;
