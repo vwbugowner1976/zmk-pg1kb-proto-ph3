@@ -36,7 +36,7 @@ manifest:
     - name: zmk-input-processor-scroll-inertia
       remote: mjmjm0101
       revision: f7dadefee453d555fe066d13a3de3bb60739b45e
-    # Zephyr 3.5 / ZMK v0.3 compatible fork.  Modern custom-settings uses
+    # Zephyr 3.5 / ZMK v0.3 compatible fork. Modern custom-settings uses
     # `configdefault`, which this Zephyr generation cannot parse.
     - name: zmk-feature-custom-settings-v03
       remote: vwbugowner1976
@@ -45,12 +45,15 @@ manifest:
     - name: zmk-module-runtime-input-processor
       remote: cormoran
       revision: 43618985f8c9d5457cc333b7ca0733f2d361911e
+    - name: zmk-feature-runtime-combo
+      remote: cormoran
+      revision: 2a6a1f412f0127099db1df1e11b656bb0fc8d82e
     - name: prospector-zmk-module
       remote: prospector
       revision: v2.2.1
       path: modules/prospector-zmk-module
     - name: zmk-behavior-jpkeysforuslayout
       remote: vwbugowner1976
-      revision: main
+      revision: 0f5376a9c52b6b64a1e5f64aff3be61723f14151
   self:
     path: zmk-pg1kb-proto-ph3
