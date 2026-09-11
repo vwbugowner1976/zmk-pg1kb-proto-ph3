@@ -67,6 +67,14 @@ CUSTOM_SETTINGS_DIR="$(module_path zmk-feature-custom-settings-v03 \
 
 RUNTIME_INPUT_DIR="$(module_path zmk-module-runtime-input-processor \
     "$ENV_ROOT/projects/zmk-module-runtime-input-processor")" || fail "runtime input processor module not found"
+RUNTIME_COMBO_DIR="$(module_path zmk-feature-runtime-combo \
+    "$ENV_ROOT/projects/zmk-feature-runtime-combo" \
+    "$WEST_TOPDIR/modules/zmk-feature-runtime-combo")" || fail \
+    "runtime-combo module not found. Update the PG1KB v0.3 west workspace after pulling this branch"
+JPKEYS_DIR="$(module_path zmk-behavior-jpkeysforuslayout \
+    "$ENV_ROOT/projects/zmk-behavior-jpkeysforuslayout" \
+    "$WEST_TOPDIR/modules/zmk-behavior-jpkeysforuslayout")" || fail \
+    "jpkeysforuslayout module not found. Update the PG1KB v0.3 west workspace after pulling this branch"
 PROSPECTOR_DIR="$(module_path prospector-zmk-module \
     "$ENV_ROOT/projects/prospector-zmk-module" \
     "$WEST_TOPDIR/modules/prospector-zmk-module")" || fail "prospector-zmk-module not found"
@@ -74,10 +82,14 @@ PROSPECTOR_DIR="$(module_path prospector-zmk-module \
 EXPECTED_INERTIA_SHA="f7dadefee453d555fe066d13a3de3bb60739b45e"
 EXPECTED_CUSTOM_SETTINGS_SHA="419ffdc727a0bb09cac0298b74345b878473fbbc"
 EXPECTED_RUNTIME_INPUT_SHA="43618985f8c9d5457cc333b7ca0733f2d361911e"
+EXPECTED_RUNTIME_COMBO_SHA="2a6a1f412f0127099db1df1e11b656bb0fc8d82e"
+EXPECTED_JPKEYS_SHA="0f5376a9c52b6b64a1e5f64aff3be61723f14151"
 
 ACTUAL_INERTIA_SHA="$(git -C "$INERTIA_DIR" rev-parse HEAD)"
 ACTUAL_CUSTOM_SETTINGS_SHA="$(git -C "$CUSTOM_SETTINGS_DIR" rev-parse HEAD)"
 ACTUAL_RUNTIME_INPUT_SHA="$(git -C "$RUNTIME_INPUT_DIR" rev-parse HEAD)"
+ACTUAL_RUNTIME_COMBO_SHA="$(git -C "$RUNTIME_COMBO_DIR" rev-parse HEAD)"
+ACTUAL_JPKEYS_SHA="$(git -C "$JPKEYS_DIR" rev-parse HEAD)"
 
 [[ "$ACTUAL_INERTIA_SHA" == "$EXPECTED_INERTIA_SHA" ]] || fail \
   "scroll-inertia is $ACTUAL_INERTIA_SHA; expected $EXPECTED_INERTIA_SHA"
@@ -85,6 +97,10 @@ ACTUAL_RUNTIME_INPUT_SHA="$(git -C "$RUNTIME_INPUT_DIR" rev-parse HEAD)"
   "custom-settings-v03 is $ACTUAL_CUSTOM_SETTINGS_SHA; expected $EXPECTED_CUSTOM_SETTINGS_SHA"
 [[ "$ACTUAL_RUNTIME_INPUT_SHA" == "$EXPECTED_RUNTIME_INPUT_SHA" ]] || fail \
   "runtime-input-processor is $ACTUAL_RUNTIME_INPUT_SHA; expected $EXPECTED_RUNTIME_INPUT_SHA"
+[[ "$ACTUAL_RUNTIME_COMBO_SHA" == "$EXPECTED_RUNTIME_COMBO_SHA" ]] || fail \
+  "runtime-combo is $ACTUAL_RUNTIME_COMBO_SHA; expected $EXPECTED_RUNTIME_COMBO_SHA"
+[[ "$ACTUAL_JPKEYS_SHA" == "$EXPECTED_JPKEYS_SHA" ]] || fail \
+  "jpkeysforuslayout is $ACTUAL_JPKEYS_SHA; expected $EXPECTED_JPKEYS_SHA"
 
 if grep -q '^configdefault ' "$CUSTOM_SETTINGS_DIR/Kconfig"; then
     fail "wrong Custom Settings checkout selected: Zephyr 3.5 cannot parse configdefault"
@@ -104,7 +120,7 @@ grep -q 'zmk_keymap_layer_activate(data->temp_layer_layer)' \
     "$RUNTIME_INPUT_DIR/src/pointing/input_processor_runtime.c" || fail \
     "runtime-input-processor v0.3 layer API patch was not applied"
 
-EXTRA_MODULES="$PROJECT_DIR;$INERTIA_DIR;$PAW3222_DIR;$PMW3610_DIR;$NON_LIPO_DIR;$CUSTOM_SETTINGS_DIR;$RUNTIME_INPUT_DIR;$PROSPECTOR_DIR"
+EXTRA_MODULES="$PROJECT_DIR;$INERTIA_DIR;$PAW3222_DIR;$PMW3610_DIR;$NON_LIPO_DIR;$CUSTOM_SETTINGS_DIR;$RUNTIME_INPUT_DIR;$RUNTIME_COMBO_DIR;$JPKEYS_DIR;$PROSPECTOR_DIR"
 
 cd "$WEST_TOPDIR"
 west build -p always \
@@ -124,6 +140,10 @@ grep -q '^CONFIG_INPUT_THREAD_STACK_SIZE=2048$' "$BUILD_DIR/zephyr/.config" || f
   "confirmed input-thread stack fix is missing"
 grep -q '^CONFIG_PG1KB_INERTIA_RUNTIME_SETTINGS=y$' "$BUILD_DIR/zephyr/.config" || fail \
   "PG1KB inertia runtime settings are not enabled"
+grep -q '^CONFIG_ZMK_RUNTIME_COMBO=y$' "$BUILD_DIR/zephyr/.config" || fail \
+  "runtime combo is not enabled"
+grep -q '^CONFIG_ZMK_RUNTIME_COMBO_STUDIO_RPC=y$' "$BUILD_DIR/zephyr/.config" || fail \
+  "runtime combo Studio RPC is not enabled"
 
 mkdir -p "$WINDOWS_OUT"
 stamp="$(date +%Y%m%d_%H%M%S)"
