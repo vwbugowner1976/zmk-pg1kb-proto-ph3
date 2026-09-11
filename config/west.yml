@@ -45,12 +45,20 @@ manifest:
     - name: zmk-module-runtime-input-processor
       remote: cormoran
       revision: 43618985f8c9d5457cc333b7ca0733f2d361911e
+    # ZMK 0.3 runtime-combo fork used by LoTom.  This revision also tolerates
+    # sparse/cleared custom-settings slots when Studio lists combos.
+    - name: zmk-feature-runtime-combo
+      remote: vwbugowner1976
+      revision: 150c67af9f80d064efdf15c928bca9204b2302a7
+      import:
+        name-blocklist:
+          - zmk-feature-custom-settings
     - name: prospector-zmk-module
       remote: prospector
       revision: v2.2.1
       path: modules/prospector-zmk-module
     - name: zmk-behavior-jpkeysforuslayout
       remote: vwbugowner1976
-      revision: main
+      revision: cb13b320bb6351ebec52ac035613330eedaf460c
   self:
     path: zmk-pg1kb-proto-ph3
