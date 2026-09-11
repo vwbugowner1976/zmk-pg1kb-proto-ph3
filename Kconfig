@@ -11,8 +11,8 @@ config PG1KB_INERTIA_RUNTIME_SETTINGS
 
 config PG1KB_BLE_MANAGEMENT_STUDIO_RPC
     bool "PG1KB BLE management Studio RPC"
-    depends on ZMK_STUDIO_RPC
-    depends on ZMK_BLE
+    depends on ZMK_STUDIO
+    depends on BT
     default n
     help
       Expose BLE profile status and profile management commands through a
