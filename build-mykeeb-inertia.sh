@@ -10,10 +10,21 @@ ENV_ROOT="${ENV_ROOT:-$HOME/zmk-dev/v0.3}"
 PG1KB_V03_ROOT="${PG1KB_V03_ROOT:-$HOME/zmk-dev/pg1kb-v03}"
 WEST_TOPDIR="${WEST_TOPDIR:-$PG1KB_V03_ROOT}"
 ZMK_APP="${ZMK_APP:-$PG1KB_V03_ROOT/zmk/app}"
-BUILD_DIR="${BUILD_DIR:-$PG1KB_V03_ROOT/build/pg1kb-mykeeb-inertia}"
 WINDOWS_OUT="${WINDOWS_OUT:-/mnt/d/ZMK-Firmware/UF2/PG1KB}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
+
+# Backward compatible: no argument means right/central, as before.
+SIDE="${1:-right}"
+[[ "$#" -le 1 ]] || fail "Usage: $0 [left|right]"
+case "$SIDE" in
+    left|right) ;;
+    *) fail "Unknown side '$SIDE'. Usage: $0 [left|right]" ;;
+esac
+
+# Separate build directories prevent left/right Devicetree and Kconfig state
+# from leaking between targets. BUILD_DIR can still be explicitly overridden.
+BUILD_DIR="${BUILD_DIR:-$PG1KB_V03_ROOT/build/pg1kb-mykeeb-inertia-$SIDE}"
 
 module_path() {
     local name="$1"; shift
@@ -123,34 +134,68 @@ grep -q 'zmk_keymap_layer_activate(data->temp_layer_layer)' \
 EXTRA_MODULES="$PROJECT_DIR;$INERTIA_DIR;$PAW3222_DIR;$PMW3610_DIR;$NON_LIPO_DIR;$CUSTOM_SETTINGS_DIR;$RUNTIME_INPUT_DIR;$RUNTIME_COMBO_DIR;$JPKEYS_DIR;$PROSPECTOR_DIR"
 
 cd "$WEST_TOPDIR"
-west build -p always \
-    -d "$BUILD_DIR" \
-    -s "$ZMK_APP" \
-    -b seeeduino_xiao_ble \
-    -S studio-rpc-usb-uart \
-    -- \
-    -DSHIELD=pg1kb_proto_right \
-    -DBOARD_ROOT="$PROJECT_DIR" \
-    -DZMK_EXTRA_MODULES="$EXTRA_MODULES" \
-    -DCONFIG_ZMK_STUDIO=y
+
+# Studio RPC and the runtime configuration editors belong to the central/right
+# half only. The left/peripheral uses its own shield config without the Studio
+# USB-UART snippet or CONFIG_ZMK_STUDIO override.
+WEST_BUILD_ARGS=(
+    west build -p always
+    -d "$BUILD_DIR"
+    -s "$ZMK_APP"
+    -b seeeduino_xiao_ble
+)
+if [[ "$SIDE" == "right" ]]; then
+    WEST_BUILD_ARGS+=(-S studio-rpc-usb-uart)
+fi
+WEST_BUILD_ARGS+=(--
+    "-DSHIELD=pg1kb_proto_$SIDE"
+    "-DBOARD_ROOT=$PROJECT_DIR"
+    "-DZMK_EXTRA_MODULES=$EXTRA_MODULES"
+)
+if [[ "$SIDE" == "right" ]]; then
+    WEST_BUILD_ARGS+=("-DCONFIG_ZMK_STUDIO=y")
+fi
+"${WEST_BUILD_ARGS[@]}"
 
 UF2="$BUILD_DIR/zephyr/zmk.uf2"
+CONFIG="$BUILD_DIR/zephyr/.config"
 [[ -f "$UF2" ]] || fail "UF2 not generated: $UF2"
-grep -q '^CONFIG_INPUT_THREAD_STACK_SIZE=2048$' "$BUILD_DIR/zephyr/.config" || fail \
-  "confirmed input-thread stack fix is missing"
-grep -q '^CONFIG_PG1KB_INERTIA_RUNTIME_SETTINGS=y$' "$BUILD_DIR/zephyr/.config" || fail \
-  "PG1KB inertia runtime settings are not enabled"
-grep -q '^CONFIG_ZMK_RUNTIME_COMBO=y$' "$BUILD_DIR/zephyr/.config" || fail \
-  "runtime combo is not enabled"
-grep -q '^CONFIG_ZMK_RUNTIME_COMBO_STUDIO_RPC=y$' "$BUILD_DIR/zephyr/.config" || fail \
-  "runtime combo Studio RPC is not enabled"
+[[ -f "$CONFIG" ]] || fail "Kconfig output not found: $CONFIG"
+
+# Validate settings specific to each half instead of requiring central-only
+# options on the peripheral.
+grep -q '^CONFIG_ZMK_NON_LIPO_BATTERY_MANAGEMENT=y
+ "$CONFIG" || fail \
+  "non-LiPo battery management is not enabled for $SIDE"
+if [[ "$SIDE" == "right" ]]; then
+    grep -q '^CONFIG_INPUT_THREAD_STACK_SIZE=2048
+ "$CONFIG" || fail \
+      "confirmed input-thread stack fix is missing"
+    grep -q '^CONFIG_PG1KB_INERTIA_RUNTIME_SETTINGS=y
+ "$CONFIG" || fail \
+      "PG1KB inertia runtime settings are not enabled"
+    grep -q '^CONFIG_ZMK_RUNTIME_COMBO=y
+ "$CONFIG" || fail \
+      "runtime combo is not enabled"
+    grep -q '^CONFIG_ZMK_RUNTIME_COMBO_STUDIO_RPC=y
+ "$CONFIG" || fail \
+      "runtime combo Studio RPC is not enabled"
+    grep -q '^CONFIG_ZMK_STUDIO=y
+ "$CONFIG" || fail \
+      "ZMK Studio is not enabled on the central/right side"
+else
+    if grep -q '^CONFIG_ZMK_STUDIO=y
+ "$CONFIG"; then
+        fail "ZMK Studio unexpectedly enabled on the left/peripheral side"
+    fi
+fi
 
 mkdir -p "$WINDOWS_OUT"
 stamp="$(date +%Y%m%d_%H%M%S)"
-dest="$WINDOWS_OUT/pg1kb_proto_right_mykeeb_inertia_${stamp}.uf2"
+dest="$WINDOWS_OUT/pg1kb_proto_${SIDE}_mykeeb_inertia_${stamp}.uf2"
 cp -- "$UF2" "$dest"
 
 echo
-echo "BUILD OK"
+echo "BUILD OK ($SIDE side)"
 echo "UF2: $dest"
 command -v wslpath >/dev/null 2>&1 && echo "Windows: $(wslpath -w "$dest")"
