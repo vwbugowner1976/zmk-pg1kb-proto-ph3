@@ -89,6 +89,12 @@ PAW3222 と PMW3610 は同じ SCLK / SDIO / CS / MOTION 配線を使いますが
 
 右手側（central）で `CONFIG_ZMK_POINTING_SMOOTH_SCROLLING=y` を有効にしています。HID Resolution Multiplier によってホストは wheel 16 単位を 1 ノッチとして扱うため、スクロールが段階的ではなく滑らかになります。HIDレポートを送るのは central 側だけなので、この設定も右手側の `.conf` にのみ書きます。
 
+### トラックボールの操作感を調整・比較する
+
+右手側（central）と左手側（peripheral）の `CONFIG_PAW3222_REPORT_INTERVAL_MS` はともに 8ms（約125Hz）に揃えています。以前は central が15ms、peripheral が8msで非対称だったため、まず入力更新間隔を統一して遅延差を減らします。
+
+MyKeebStudio の **Trackball Runtime Settings** では、左右の Base / Num / Sym 各モードの速度倍率、左右の回転補正、スクロール慣性の開始・移動・停止しきい値を変更し、実機で比較できます。新しい **Balanced / Responsive / Precision** テストプロファイルは速度倍率だけを一括変更し、向き・軸変換・慣性設定は維持します。通信が途中で失敗した場合は一部だけ適用される可能性があるため、Refresh で値を読み直してください。
+
 ### 慣性スクロール
 
 [zmk-input-processor-scroll-inertia](https://github.com/mjmjm0101/zmk-input-processor-scroll-inertia) により、ボールを弾いて離した後もiOS風に惰性でスクロールが続きます。
