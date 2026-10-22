@@ -45,6 +45,10 @@ manifest:
     - name: zmk-module-runtime-input-processor
       remote: cormoran
       revision: 43618985f8c9d5457cc333b7ca0733f2d361911e
+    # On-device battery history in Zephyr settings/flash; pin tested upstream revision.
+    - name: zmk-module-battery-history
+      remote: cormoran
+      revision: 307755dd2ad4d320e14de162e8e5ef018f29d929
     - name: zmk-feature-runtime-combo
       remote: cormoran
       revision: 2a6a1f412f0127099db1df1e11b656bb0fc8d82e
